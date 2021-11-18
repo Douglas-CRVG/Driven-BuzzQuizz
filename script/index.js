@@ -22,10 +22,19 @@ function renderHome(props) {
             </div>
             <h1>Todos os Quizzes</h1>
             <div class="all-quizzes">
-                ${allQuizzes.map(renderQuiz)}
+                ${items(allQuizzes)}
             </div>
         </section>
     `;
+}
+
+function items(allQuizzes){
+    let item = "";
+    for (let i = 0; i<allQuizzes.length; i++){
+        item += renderQuiz(allQuizzes[i])
+    }
+
+    return item;
 }
 
 function renderQuiz(props) {
@@ -133,17 +142,17 @@ function form() {
             <span>Resposta incorretas</span>
 
             <div>
-                <input type="text" placeholder="Resposta correta" />
+                <input type="text" placeholder="Resposta incorreta" />
                 <input type="text" placeholder="URL da imagem" />
             </div>
 
             <div>
-                <input type="text" placeholder="Resposta correta" />
+                <input type="text" placeholder="Resposta incorreta" />
                 <input type="text" placeholder="URL da imagem" />
             </div>
 
             <div>
-                <input type="text" placeholder="Resposta correta" />
+                <input type="text" placeholder="Resposta incorreta" />
                 <input type="text" placeholder="URL da imagem" />
             </div>
         </div>
