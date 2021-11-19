@@ -4,6 +4,8 @@ let vw;
 let amountQuestion;
 let amountLevel;
 
+const createdQuizz = {};
+
 getQuizzes()
 function getQuizzes() {
     axios.get(`${URL_API}/quizzes`).then(renderHome);
@@ -28,9 +30,9 @@ function renderHome(props) {
     `;
 }
 
-function items(allQuizzes){
+function items(allQuizzes) {
     let item = "";
-    for (let i = 0; i<allQuizzes.length; i++){
+    for (let i = 0; i < allQuizzes.length; i++) {
         item += renderQuiz(allQuizzes[i])
     }
 
@@ -82,7 +84,7 @@ function renderCreateQuiz2() {
     `;
 }
 
-function renderCreateQuiz3() {
+/*function renderCreateQuiz3() {
     getScreenWidth();
 
     main.innerHTML = `
@@ -106,7 +108,7 @@ function renderCreateQuiz3() {
     `;
 
     main.scrollIntoView();
-}
+}*/
 
 function renderCreateQuiz4() {
     main.innerHTML = `
@@ -124,14 +126,15 @@ function renderCreateQuiz4() {
 
     document.querySelector("header").scrollIntoView();
 }
-
+//consertar css h6
 function form() {
     return `
     <div class="form">
         <div>
             <span>${'Pergunta 1'}</span>
-            <input type="text" placeholder="Texto da pergunta" />
-            <input type="text" placeholder="Cor de fundo da pergunta" />
+            <input class ="question-title" type="text" placeholder="Texto da pergunta" />
+            <h6>Cor de fundo da pergunta</h6>
+            <input class ="question-color" type="color" />
         </div>
         <div>
             <span>Resposta correta</span>
@@ -198,4 +201,18 @@ function quizPage(element) {
         <p>Essa página ainda não foi construída</p>
         <p>Mas sei que você apertou no no quiz ${element.id}</p>
     `;
+}
+
+function renderCreateQuiz3(){//validateQuestions(){
+    alert("oi")
+    let title = document.querySelector(".question-title").value;
+    let color = document.querySelector(".question-color").value;
+    alert (color)
+    
+}
+
+function validateTitle (title){
+    if (title.length < 20){
+        alert ("A pergunta deve ter mais de 20 caracteres");
+    }
 }
