@@ -238,6 +238,7 @@ main{
 
 .border-error {
     border: solid 1px red !important;
+    padding: 20px;
 }
 
 .span-error {

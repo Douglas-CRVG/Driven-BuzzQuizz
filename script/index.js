@@ -1,6 +1,7 @@
 const URL_API = "https://mock-api.driven.com.br/api/v4/buzzquizz";
 const main = document.querySelector("main");
 let createQuiz = {};
+let answers = [];
 
 let err = false;
 let vw;
@@ -53,6 +54,8 @@ function renderQuiz(props) {
     `;
 }
 
+
+// Tela 1
 function renderCreateQuiz() {
     main.innerHTML = `
     <section class="register-quiz">
@@ -117,6 +120,7 @@ function validationQuiz() {
     }
 }
 
+// Tela 2
 function renderCreateQuiz2() {
     main.innerHTML = `
     <section class="register-quiz">
@@ -132,6 +136,7 @@ function renderCreateQuiz2() {
 }
 
 function validationQuiz2() {
+    err = false;
     let inputs = document.querySelectorAll('.form input');
     let errors = document.querySelectorAll('.form span');
 
@@ -150,7 +155,7 @@ function validationQuiz2() {
     validationColor(inputColor, spanColor);
 
     //validação das respostas
-    answers = validationAnswers(inputs, errors);
+    validationAnswers(inputs, errors);
 
     question = {
         title: inputQuestion.value,
@@ -159,14 +164,11 @@ function validationQuiz2() {
     }
 
     createQuiz["questions"].push(question);
-
-    console.log(question)
-    console.log(createQuiz)
-
 }
 
 function validationAnswers(inputs, errors) {
-    let answers = [];
+    answers = [];
+    err = false;
 
     //resposta correta
     let spanCorrect = errors[4];
@@ -181,11 +183,11 @@ function validationAnswers(inputs, errors) {
 
     validationUrl(inputUrl, spanUrl);
 
-    answers.push({
-        text: inputCorrect.value,
-        image: inputUrl.value,
-        isCorrectAnswer: true
-    });
+    invalidationAnswers(inputs[4], inputs[5], errors[7]);
+
+    invalidationAnswers(inputs[6], inputs[7], errors[8]);
+
+    invalidationAnswers(inputs[8], inputs[9], errors[9]);
 
     //respostas erradas
     let spanIncorrect1 = errors[4];
@@ -199,13 +201,33 @@ function validationAnswers(inputs, errors) {
     //validationUrl(inputUrl, spanUrl);
 
     answers.push({
-        text: inputIncorrect1.value,
-        image: inputUrlinc.value,
-        isCorrectAnswer: false
-    });
+        text: inputCorrect.value,
+        image: inputUrl.value,
+        isCorrectAnswer: true
+    })
+
+    if (err) {
+        answers = [];
+    }
 
     console.log(answers)
-    return answers;
+}
+
+function invalidationAnswers(inputText, inputUrl, span) {
+    if ((inputText.value != '' && inputUrl.value == '') || (inputText.value == '' && inputUrl.value != '')) {
+        span.innerHTML = 'Para a resposta ser válida preencha os dois campos.';
+        err = showError(inputText.parentNode, span);
+    } else {
+        hiddenError(inputText.parentNode, span);
+
+        if (inputText.value != '') {
+            answers.push({
+                text: inputText.value,
+                image: inputUrl.value,
+                isCorrectAnswer: false
+            });
+        }
+    }
 }
 
 // Tela 3
@@ -276,21 +298,18 @@ function form() {
 
             <div>
                 <input type="text" placeholder="Resposta incorreta" />
-                <span></span>
                 <input type="text" placeholder="URL da imagem" />
                 <span></span>
             </div>
 
             <div>
                 <input type="text" placeholder="Resposta incorreta" />
-                <span></span>
                 <input type="text" placeholder="URL da imagem" />
                 <span></span>
             </div>
 
             <div>
                 <input type="text" placeholder="Resposta incorreta" />
-                <span></span>
                 <input type="text" placeholder="URL da imagem" />
                 <span></span>
             </div>
@@ -396,7 +415,6 @@ function validationCorrectAnswer(input, span) {
 }
 
 function showError(input, span) {
-    input.value = '';
     input.classList.add('border-error', 'fade-in');
     span.classList.add('span-error', 'fade-in');
 
@@ -405,7 +423,7 @@ function showError(input, span) {
 
 function hiddenError(input, span) {
     span.innerHTML = '';
-    input.classList.remove('border-error');
+    input.classList.remove('border-error', 'fade-in');
 
     return false;
 }
