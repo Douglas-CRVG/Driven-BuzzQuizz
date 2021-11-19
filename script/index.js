@@ -15,7 +15,6 @@ function getQuizzes() {
 // div.user-quiz ainda será fraciona a uma função a parte, mas só acontecerá após a parte de o usuário criar seu próprio quiz
 function renderHome(props) {
     const allQuizzes = props.data;
-    console.log(allQuizzes)
 
     main.innerHTML = `
         <section class="quiz-list">
@@ -106,8 +105,12 @@ function validationQuiz() {
     validationLevel(inputLevels, spanLevels);
 
     if (!err) {
-        createQuiz["title"] = inputTitle.value;
-        createQuiz["image"] = inputUrl.value;
+        createQuiz = {
+            title: inputTitle.value,
+            image: inputUrl.value,
+            questions: [],
+            levels: [],
+        }
 
         console.log(createQuiz)
         renderCreateQuiz2();
@@ -126,6 +129,100 @@ function renderCreateQuiz2() {
         <button onclick="renderCreateQuiz3();">Prosseguir pra criar níveis</button>
     </section>
     `;
+}
+
+function validationQuestion(input, span) {
+    if (input.value.split('').length < 20) {
+        span.innerHTML = 'A pergunta deve ter no mínimo 20 caracteres';
+        err = showError(input, span);
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function validationColor(input, span) {
+    if (input.value === "#ffffff") {
+        span.innerHTML = 'A cor não pode ser #FFFFFF';
+        err = showError(input, span);
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function validationQuiz2() {
+    let inputs = document.querySelectorAll('.form input');
+    let errors = inputs[0].parentNode.querySelectorAll('span');
+
+
+    //Validando pergunta
+    let spanQuestion = errors[0];
+    let inputQuestion = inputs[0];
+
+    //function texto de pergunta maior que 19 caracteres
+    validationQuestion(inputQuestion, spanQuestion);
+
+    //Cor vem pronta
+    let spanColor = errors[1];
+    let inputColor = inputs[1];
+
+    //function cor não pode ser #ffffff
+    validationColor(inputColor, spanColor);
+
+    //validação das respostas
+    answers = validationAnswers(inputs, errors);
+
+    question = {
+        title: inputQuestion.value,
+        color: inputColor.value,
+        answers
+    }
+
+    createQuiz["questions"].push(question);
+
+    console.log(question)
+    console.log(createQuiz)
+
+}
+
+function validationAnswers(inputs, errors){
+    let answers = [];
+
+    //resposta correta
+    let spanCorrect = errors[2];
+    let inputCorrect = inputs[2];
+    // function resposta não pode estar vazia obrigatoriamente preenchida
+
+    //Validando URL com regex resposta correta
+    let spanUrl = errors[3];
+    let inputUrl = inputs[3];
+
+    //validationUrl(inputUrl, spanUrl);
+
+    answers.push({
+        text: inputCorrect.value,
+        image: inputUrl.value,
+        isCorrectAnswer: true
+    });
+
+    //respostas erradas
+    let spanIncorrect1 = errors[4];
+    let inputIncorrect1 = inputs[4];
+    // function resposta não pode estar vazia
+
+    //Validando URL com regex resposta correta
+    let spanUrlinc = errors[5];
+    let inputUrlinc = inputs[5];
+
+    //validationUrl(inputUrl, spanUrl);
+
+    answers.push({
+        text: inputIncorrect1.value,
+        image: inputUrlinc.value,
+        isCorrectAnswer: false
+    });
+
+    console.log(answers)
+    return answers;
 }
 
 function renderCreateQuiz3() {
@@ -177,29 +274,39 @@ function form() {
         <div>
             <span>${'Pergunta 1'}</span>
             <input type="text" placeholder="Texto da pergunta" />
-            <input type="text" placeholder="Cor de fundo da pergunta" />
+            <span></span>
+            <input type="color" placeholder="Cor de fundo da pergunta" />
+            <span></span>
         </div>
         <div>
             <span>Resposta correta</span>
             <input type="text" placeholder="Resposta correta" />
+            <span></span>
             <input type="text" placeholder="URL da imagem" />
+            <span></span>
         </div>
         <div>
             <span>Resposta incorretas</span>
 
             <div>
                 <input type="text" placeholder="Resposta incorreta" />
+                <span></span>
                 <input type="text" placeholder="URL da imagem" />
+                <span></span>
             </div>
 
             <div>
                 <input type="text" placeholder="Resposta incorreta" />
+                <span></span>
                 <input type="text" placeholder="URL da imagem" />
+                <span></span>
             </div>
 
             <div>
                 <input type="text" placeholder="Resposta incorreta" />
+                <span></span>
                 <input type="text" placeholder="URL da imagem" />
+                <span></span>
             </div>
         </div>
     </div>
@@ -211,7 +318,7 @@ function formClosed(flag, amount) {
 
     for (let i = 1; i < amount; i++) {
         questions += `
-        <div class="closed" onclick="alert(this)">
+        <div class="closed" onclick="validationQuiz2()">
             <span>${flag === 1 ? `Pergunta ${i + 1}` : `Nível ${i + 1}`}</span>
             <img src="img/pencil.png" />
         </div>
@@ -286,6 +393,8 @@ function showError(input, span) {
 function hiddenError(input, span) {
     span.innerHTML = '';
     input.classList.remove('border-error');
+
+    return false;
 }
 
 function quizPage(element) {
