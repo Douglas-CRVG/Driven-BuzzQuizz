@@ -1,5 +1,6 @@
 const URL_API = "https://mock-api.driven.com.br/api/v4/buzzquizz";
 const main = document.querySelector("main");
+let createQuiz = {};
 
 let err = false;
 let vw;
@@ -105,6 +106,10 @@ function validationQuiz() {
     validationLevel(inputLevels, spanLevels);
 
     if (!err) {
+        createQuiz["title"] = inputTitle.value;
+        createQuiz["image"] = inputUrl.value;
+
+        console.log(createQuiz)
         renderCreateQuiz2();
     }
 }
@@ -226,7 +231,6 @@ function renderInputOrTextArea() {
 
 function getScreenWidth() {
     vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-    console.log(vw);
 }
 
 // Validacao dos errors
@@ -235,7 +239,7 @@ function validationTitle(input, span) {
         span.innerHTML = 'Título inválido';
         err = showError(input, span);
     } else {
-        hiddenError(input, spanTitle);
+        hiddenError(input, span);
     }
 }
 
