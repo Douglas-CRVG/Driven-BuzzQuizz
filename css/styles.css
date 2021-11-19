@@ -236,6 +236,35 @@ main{
     width: 500px;
 }
 
+.border-error {
+    border: solid 1px red !important;
+}
+
+.span-error {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: red;
+
+    margin-left: 5px;
+}
+
+.fade-in {
+    opacity: 1;
+	animation-name: fadeInOpacity;
+	animation-iteration-count: 1;
+	animation-timing-function: ease-in;
+	animation-duration: 0.5s;
+}
+
+@keyframes fadeInOpacity {
+    0% {
+		opacity: 0;
+	}
+	100% {
+		opacity: 1;
+	}
+}
+
 @media (max-width: 1100px) {
     .quiz-list{
         width: 100%;

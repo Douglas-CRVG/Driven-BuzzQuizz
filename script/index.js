@@ -1,5 +1,7 @@
 const URL_API = "https://mock-api.driven.com.br/api/v4/buzzquizz";
 const main = document.querySelector("main");
+
+let err = false;
 let vw;
 let amountQuestion;
 let amountLevel;
@@ -28,9 +30,9 @@ function renderHome(props) {
     `;
 }
 
-function items(allQuizzes){
+function items(allQuizzes) {
     let item = "";
-    for (let i = 0; i<allQuizzes.length; i++){
+    for (let i = 0; i < allQuizzes.length; i++) {
         item += renderQuiz(allQuizzes[i])
     }
 
@@ -56,19 +58,58 @@ function renderCreateQuiz() {
     <section class="register-quiz">
         <p>Comece pelo começo</p>
         <div class="form">
-            <input type="text" name="title"  placeholder="Título do seu quizz" />
+            <input type="text" name="title" placeholder="Título do seu quizz" />
+            <span></span>
             <input type="text" name="url" placeholder="URL da imagem do seu quizz" />
-            <input type="text" name="amountQuestion" placeholder="Quantidade de perguntas do quizz" />
-            <input type="text" name="amountLevel" placeholder="Quantidade de niveis do quizz" />
+            <span></span>
+            <input type="number" name="amountQuestion" placeholder="Quantidade de perguntas do quizz" />
+            <span></span>
+            <input type="number" name="amountLevel" placeholder="Quantidade de niveis do quizz" />
+            <span></span>
         </div>
-        <button onclick="renderCreateQuiz2();">Prosseguir pra criar perguntas</button>
+        <button onclick="validationQuiz();">Prosseguir pra criar perguntas</button>
     </section>    
     `;
 }
 
-function renderCreateQuiz2() {
-    getAmounts();
+function validationQuiz() {
+    let inputs = document.querySelectorAll('.register-quiz .form input');
+    let errors = inputs[0].parentNode.querySelectorAll('span');
 
+    //Validando o title
+    let spanTitle = errors[0];
+    let inputTitle = inputs[0];
+
+    validationTitle(inputTitle, spanTitle);
+
+    //Validando URL com regex
+    let spanUrl = errors[1];
+    let inputUrl = inputs[1];
+
+    validationUrl(inputUrl, spanUrl);
+
+    //Validando quantidade de perguntas
+    amountQuestion = document.querySelector('.register-quiz .form input[name="amountQuestion"]').value;
+
+    let spanQuestions = errors[2];
+    let inputQuestions = inputs[2];
+
+    validationQuestions(inputQuestions, spanQuestions);
+
+    // Validando quantidade de niveis
+    amountLevel = document.querySelector('.register-quiz .form input[name="amountLevel"]').value;
+
+    let spanLevels = errors[3];
+    let inputLevels = inputs[3];
+
+    validationLevel(inputLevels, spanLevels);
+
+    if (!err) {
+        renderCreateQuiz2();
+    }
+}
+
+function renderCreateQuiz2() {
     main.innerHTML = `
     <section class="register-quiz">
         <p>Crie suas perguntas</p>
@@ -175,11 +216,6 @@ function formClosed(flag, amount) {
     return questions;
 }
 
-function getAmounts() {
-    amountQuestion = document.querySelector('.register-quiz .form input[name="amountQuestion"').value;
-    amountLevel = document.querySelector('.register-quiz .form input[name="amountLevel"').value;
-}
-
 function renderInputOrTextArea() {
     if (vw <= 375) {
         return `<textarea placeholder="Descrição do nível"></textarea>`
@@ -191,6 +227,61 @@ function renderInputOrTextArea() {
 function getScreenWidth() {
     vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
     console.log(vw);
+}
+
+// Validacao dos errors
+function validationTitle(input, span) {
+    if (input.value.split('').length < 19 || input.value.split('').length > 65) {
+        span.innerHTML = 'Título inválido';
+        err = showError(input, span);
+    } else {
+        hiddenError(input, spanTitle);
+    }
+}
+
+function validationUrl(input, span) {
+    let expression = /([a-z\-_0-9\/\:\.]*\.(jpg|jpeg|png|gif))/i;
+    let regex = new RegExp(expression);
+
+    if (!input.value.match(regex)) {
+        span.innerHTML = 'URL inválida';
+        err = showError(input, span);
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function validationQuestions(input, span) {
+    if (amountQuestion < 3) {
+        span.innerHTML = 'Quantidade de perguntas tem que ser no mínimo três';
+        err = showError(input, span);
+
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function validationLevel(input, span) {
+    if (amountLevel < 2) {
+        span.innerHTML = 'Quantidade de níveis tem que ser no minímo duas';
+        err = showError(input, span);
+
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function showError(input, span) {
+    input.value = '';
+    input.classList.add('border-error', 'fade-in');
+    span.classList.add('span-error', 'fade-in');
+
+    return true;
+}
+
+function hiddenError(input, span) {
+    span.innerHTML = '';
+    input.classList.remove('border-error');
 }
 
 function quizPage(element) {
