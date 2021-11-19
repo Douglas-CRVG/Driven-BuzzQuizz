@@ -73,6 +73,7 @@ function renderCreateQuiz() {
 }
 
 function validationQuiz() {
+    err = false;
     let inputs = document.querySelectorAll('.register-quiz .form input');
     let errors = inputs[0].parentNode.querySelectorAll('span');
 
@@ -112,7 +113,6 @@ function validationQuiz() {
             levels: [],
         }
 
-        console.log(createQuiz)
         renderCreateQuiz2();
     }
 }
@@ -131,38 +131,19 @@ function renderCreateQuiz2() {
     `;
 }
 
-function validationQuestion(input, span) {
-    if (input.value.split('').length < 20) {
-        span.innerHTML = 'A pergunta deve ter no mínimo 20 caracteres';
-        err = showError(input, span);
-    } else {
-        hiddenError(input, span);
-    }
-}
-
-function validationColor(input, span) {
-    if (input.value === "#ffffff") {
-        span.innerHTML = 'A cor não pode ser #FFFFFF';
-        err = showError(input, span);
-    } else {
-        hiddenError(input, span);
-    }
-}
-
 function validationQuiz2() {
     let inputs = document.querySelectorAll('.form input');
-    let errors = inputs[0].parentNode.querySelectorAll('span');
-
+    let errors = document.querySelectorAll('.form span');
 
     //Validando pergunta
-    let spanQuestion = errors[0];
+    let spanQuestion = errors[1];
     let inputQuestion = inputs[0];
 
     //function texto de pergunta maior que 19 caracteres
     validationQuestion(inputQuestion, spanQuestion);
 
     //Cor vem pronta
-    let spanColor = errors[1];
+    let spanColor = errors[2];
     let inputColor = inputs[1];
 
     //function cor não pode ser #ffffff
@@ -184,19 +165,21 @@ function validationQuiz2() {
 
 }
 
-function validationAnswers(inputs, errors){
+function validationAnswers(inputs, errors) {
     let answers = [];
 
     //resposta correta
-    let spanCorrect = errors[2];
+    let spanCorrect = errors[4];
     let inputCorrect = inputs[2];
     // function resposta não pode estar vazia obrigatoriamente preenchida
 
+    validationCorrectAnswer(inputCorrect, spanCorrect);
+
     //Validando URL com regex resposta correta
-    let spanUrl = errors[3];
+    let spanUrl = errors[5];
     let inputUrl = inputs[3];
 
-    //validationUrl(inputUrl, spanUrl);
+    validationUrl(inputUrl, spanUrl);
 
     answers.push({
         text: inputCorrect.value,
@@ -225,6 +208,7 @@ function validationAnswers(inputs, errors){
     return answers;
 }
 
+// Tela 3
 function renderCreateQuiz3() {
     getScreenWidth();
 
@@ -251,6 +235,7 @@ function renderCreateQuiz3() {
     main.scrollIntoView();
 }
 
+// Tela 4
 function renderCreateQuiz4() {
     main.innerHTML = `
     <section class="register-quiz">
@@ -268,6 +253,7 @@ function renderCreateQuiz4() {
     document.querySelector("header").scrollIntoView();
 }
 
+// Formularios
 function form() {
     return `
     <div class="form">
@@ -377,6 +363,33 @@ function validationLevel(input, span) {
         span.innerHTML = 'Quantidade de níveis tem que ser no minímo duas';
         err = showError(input, span);
 
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function validationQuestion(input, span) {
+    if (input.value.split('').length < 20) {
+        span.innerHTML = 'A pergunta deve ter no mínimo 20 caracteres';
+        err = showError(input, span);
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function validationColor(input, span) {
+    if (input.value === "#ffffff") {
+        span.innerHTML = 'A cor não pode ser #FFFFFF';
+        err = showError(input, span);
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function validationCorrectAnswer(input, span) {
+    if (input.value.split('').length == "") {
+        span.innerHTML = 'A resposta não pode ficar vazia';
+        err = showError(input, span);
     } else {
         hiddenError(input, span);
     }

@@ -275,9 +275,7 @@ main{
     .user-quiz{
         margin-bottom: 35px;
     }
-}
 
-@media (max-width: 375px) {
     main {
         align-items: unset;
     }
