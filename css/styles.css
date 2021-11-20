@@ -405,7 +405,24 @@ main{
         margin-top: 24px !important;
     }
 
+    .title{
+        height: 142px;
+    }
+
+    .title p{
+        font-size: 19px;
+    }
+
     .question{
         width: 100%;
+        padding: 14px 18px 18px;
+    }
+
+    .title-question{
+        padding: 20px;
+    }
+
+    .answers img{
+        height: 160px;
     }
 }

@@ -26,35 +26,29 @@ function renderHome(props) {
             </div>
             <h1>Todos os Quizzes</h1>
             <div class="all-quizzes">
-                ${items(allQuizzes)}
+                ${renderQuiz(allQuizzes)}
             </div>
         </section>
     `;
 }
 
-function items(allQuizzes) {
-    let item = "";
-    for (let i = 0; i < allQuizzes.length; i++) {
-        item += renderQuiz(allQuizzes[i])
-    }
-
-    return item;
-}
-
 function renderQuiz(props) {
-    const {
-        image,
-        title,
-        id
-    } = props;
-
-    return `
-        <div id=${id} class="quiz"  style="background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="getQuiz(this);">
-            <p>${title}</p>
-        </div>
-    `;
+    let html = "";
+    props.map(prop => {
+        const {
+            image,
+            title,
+            id
+        } = prop;
+    
+        html += `
+            <div id=${id} class="quiz"  style="background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="getQuiz(this);">
+                <p>${title}</p>
+            </div>
+        `;
+    });
+    return html;
 }
-
 
 // Tela 1
 function renderCreateQuiz() {
@@ -461,7 +455,7 @@ function quizPage(props) {
                 <p>${title}</p>
             </div>
             <div class="container-questions">
-                ${questions.map(question)}
+                ${question(questions)}
             </div>
         </section>
     `;
@@ -472,39 +466,48 @@ function comparador() {
 }
 
 function question (props) {
+    let html = "";
     console.log(props)
-    const {
-        answers,
-        color,
-        title
-    } = props;
 
-    answers.sort(comparador);
-
-    return `
-    <div class="question">
-        <div class="title-question" style="background-color: ${color}">
-                <p>${title}</p>
+    props.map(prop =>{
+        const {
+            answers,
+            color,
+            title
+        } = prop;
+    
+        answers.sort(comparador);
+    
+        html += `
+        <div class="question">
+            <div class="title-question" style="background-color: ${color}">
+                    <p>${title}</p>
+            </div>
+            <div class="container-answers">
+                ${answer(answers)}
+            </div>
         </div>
-        <div class="container-answers">
-            ${answers.map(answer).filter(item => item !== ",")}
-        </div>
-    </div>
-    `;
+        `;
+    });
+    return html;    
 }
 
 function answer(props){
+    let html = ""
     console.log(props)
-    const {
-        image,
-        isCorrectAnswer,
-        text
-    } = props;
-    
-    return `
-    <div id ="${isCorrectAnswer}" class="answers">
-        <img src="${image}" alt="${text}>"
-        <p>${text}</p>
-    </div>
-    `;
+    props.map(prop => {
+        const {
+            image,
+            isCorrectAnswer,
+            text
+        } = prop;
+        
+        html += `
+        <div id ="${isCorrectAnswer}" class="answers" onclick="alert(this)">
+            <img src="${image}" alt="${text}>"
+            <p>${text}</p>
+        </div>
+        `;
+    });
+    return html;
 }
