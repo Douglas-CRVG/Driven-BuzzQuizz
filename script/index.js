@@ -49,7 +49,7 @@ function renderQuiz(props) {
     } = props;
 
     return `
-        <div id=${id} class="quiz"  style="background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="quizPage(this);">
+        <div id=${id} class="quiz"  style="background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="getQuiz(this);">
             <p>${title}</p>
         </div>
     `;
@@ -441,9 +441,70 @@ function hiddenError(input, span) {
     return false;
 }
 
-function quizPage(element) {
+function getQuiz(element){
+    axios.get(`${URL_API}/quizzes/${element.id}`).then(quizPage)
+}
+
+function quizPage(props) {
+    const {
+        id,
+        image,
+        levels,
+        questions,
+        title
+    } = props.data;
+    console.log(props.data)
+
     main.innerHTML = `
-        <p>Essa página ainda não foi construída</p>
-        <p>Mas sei que você apertou no no quiz ${element.id}</p>
+        <section class="open-quiz">
+            <div id="${id}" class="title style" style="background: linear-gradient(0deg, rgba(0, 0, 0, 0.57), rgba(0, 0, 0, 0.57)), url(${image});">
+                <p>${title}</p>
+            </div>
+            <div class="container-questions">
+                ${questions.map(question)}
+            </div>
+        </section>
+    `;
+}
+
+function comparador() { 
+	return Math.random() - 0.5; 
+}
+
+function question (props) {
+    console.log(props)
+    const {
+        answers,
+        color,
+        title
+    } = props;
+
+    answers.sort(comparador);
+
+    return `
+    <div class="question">
+        <div class="title-question" style="background-color: ${color}">
+                <p>${title}</p>
+        </div>
+        <div class="container-answers">
+            ${answers.map(answer).filter(item => item !== ",")}
+        </div>
+    </div>
+    `;
+}
+
+function answer(props){
+    console.log(props)
+    const {
+        image,
+        isCorrectAnswer,
+        text
+    } = props;
+    
+    return `
+    <div id ="${isCorrectAnswer}" class="answers">
+        <img src="${image}" alt="${text}>"
+        <p>${text}</p>
+    </div>
     `;
 }
