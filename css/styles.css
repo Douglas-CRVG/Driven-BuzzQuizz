@@ -257,6 +257,10 @@ main{
 	animation-duration: 0.5s;
 }
 
+.reset {
+    all: unset;
+}
+
 @keyframes fadeInOpacity {
     0% {
 		opacity: 0;

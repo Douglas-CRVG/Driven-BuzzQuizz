@@ -2,6 +2,7 @@ const URL_API = "https://mock-api.driven.com.br/api/v4/buzzquizz";
 const main = document.querySelector("main");
 let createQuiz = {};
 let answers = [];
+let count = 0;
 
 let err = false;
 let vw;
@@ -121,21 +122,19 @@ function validationQuiz() {
 }
 
 // Tela 2
-function renderCreateQuiz2() {
+function renderCreateQuiz2(number, obj) {
     main.innerHTML = `
     <section class="register-quiz">
         <p>Crie suas perguntas</p>
 
-        ${form()}
-
-        ${formClosed(1, amountQuestion)}
+        ${renderQuestions(number == undefined ? 1 : number, obj)}
         
         <button onclick="renderCreateQuiz3();">Prosseguir pra criar níveis</button>
     </section>
     `;
 }
 
-function validationQuiz2() {
+function validationQuiz2(element) {
     err = false;
     let inputs = document.querySelectorAll('.form input');
     let errors = document.querySelectorAll('.form span');
@@ -164,9 +163,29 @@ function validationQuiz2() {
     }
 
     createQuiz["questions"].push(question);
+
+    if (!err) {
+        renderCreateQuiz2(element.id);
+    }
+
+}
+
+function renderQuestions(x, obj) {
+    let forms = '';
+
+    for (let i = 1; i <= amountQuestion; i++) {
+        if (i == x) {
+            forms += form(x, obj);
+        } else {
+            forms += formClosed(1, i)
+        }
+    }
+
+    return forms;
 }
 
 function validationAnswers(inputs, errors) {
+    count = 0;
     answers = [];
     err = false;
 
@@ -189,28 +208,20 @@ function validationAnswers(inputs, errors) {
 
     invalidationAnswers(inputs[8], inputs[9], errors[9]);
 
-    //respostas erradas
-    let spanIncorrect1 = errors[4];
-    let inputIncorrect1 = inputs[4];
-    // function resposta não pode estar vazia
-
-    //Validando URL com regex resposta correta
-    let spanUrlinc = errors[5];
-    let inputUrlinc = inputs[5];
-
-    //validationUrl(inputUrl, spanUrl);
-
     answers.push({
         text: inputCorrect.value,
         image: inputUrl.value,
         isCorrectAnswer: true
     })
 
-    if (err) {
+    if (err || count == 0) {
         answers = [];
+        err = true;
     }
 
-    console.log(answers)
+    if (count == 0) {
+        alert('Informe no mínimo uma resposta errada.')
+    }
 }
 
 function invalidationAnswers(inputText, inputUrl, span) {
@@ -221,11 +232,19 @@ function invalidationAnswers(inputText, inputUrl, span) {
         hiddenError(inputText.parentNode, span);
 
         if (inputText.value != '') {
-            answers.push({
-                text: inputText.value,
-                image: inputUrl.value,
-                isCorrectAnswer: false
-            });
+            validationUrl(inputUrl, span);
+
+            if (!err) {
+                answers.push({
+                    text: inputText.value,
+                    image: inputUrl.value,
+                    isCorrectAnswer: false
+                });
+
+                count++;
+            }
+        } else {
+            hiddenError(inputUrl, span);
         }
     }
 }
@@ -276,11 +295,11 @@ function renderCreateQuiz4() {
 }
 
 // Formularios
-function form() {
+function form(number, obj) {
     return `
     <div class="form">
         <div>
-            <span>${'Pergunta 1'}</span>
+            <span>Pergunta ${number}</span>
             <input type="text" placeholder="Texto da pergunta" />
             <span></span>
             <input type="color" placeholder="Cor de fundo da pergunta" />
@@ -318,19 +337,13 @@ function form() {
     `
 }
 
-function formClosed(flag, amount) {
-    let questions = [];
-
-    for (let i = 1; i < amount; i++) {
-        questions += `
-        <div class="closed" onclick="validationQuiz2()">
-            <span>${flag === 1 ? `Pergunta ${i + 1}` : `Nível ${i + 1}`}</span>
+function formClosed(flag, count) {
+    return `
+        <div class="closed" onclick="validationQuiz2(this)" id=${count}>
+            <span>${flag === 1 ? `Pergunta ${count}` : `Nível ${count}`}</span>
             <img src="img/pencil.png" />
         </div>
     `;
-    }
-
-    return questions;
 }
 
 function renderInputOrTextArea() {
