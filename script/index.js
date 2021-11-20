@@ -1,6 +1,8 @@
 const URL_API = "https://mock-api.driven.com.br/api/v4/buzzquizz";
 const main = document.querySelector("main");
 let createQuiz = {};
+let answers = [];
+let count = 0;
 
 let err = false;
 let vw;
@@ -15,7 +17,6 @@ function getQuizzes() {
 // div.user-quiz ainda será fraciona a uma função a parte, mas só acontecerá após a parte de o usuário criar seu próprio quiz
 function renderHome(props) {
     const allQuizzes = props.data;
-    console.log(allQuizzes)
 
     main.innerHTML = `
         <section class="quiz-list">
@@ -54,6 +55,8 @@ function renderQuiz(props) {
     `;
 }
 
+
+// Tela 1
 function renderCreateQuiz() {
     main.innerHTML = `
     <section class="register-quiz">
@@ -74,6 +77,7 @@ function renderCreateQuiz() {
 }
 
 function validationQuiz() {
+    err = false;
     let inputs = document.querySelectorAll('.register-quiz .form input');
     let errors = inputs[0].parentNode.querySelectorAll('span');
 
@@ -106,28 +110,146 @@ function validationQuiz() {
     validationLevel(inputLevels, spanLevels);
 
     if (!err) {
-        createQuiz["title"] = inputTitle.value;
-        createQuiz["image"] = inputUrl.value;
+        createQuiz = {
+            title: inputTitle.value,
+            image: inputUrl.value,
+            questions: [],
+            levels: [],
+        }
 
-        console.log(createQuiz)
         renderCreateQuiz2();
     }
 }
 
-function renderCreateQuiz2() {
+// Tela 2
+function renderCreateQuiz2(number, obj) {
     main.innerHTML = `
     <section class="register-quiz">
         <p>Crie suas perguntas</p>
 
-        ${form()}
-
-        ${formClosed(1, amountQuestion)}
+        ${renderQuestions(number == undefined ? 1 : number, obj)}
         
         <button onclick="renderCreateQuiz3();">Prosseguir pra criar níveis</button>
     </section>
     `;
 }
 
+function validationQuiz2(element) {
+    err = false;
+    let inputs = document.querySelectorAll('.form input');
+    let errors = document.querySelectorAll('.form span');
+
+    //Validando pergunta
+    let spanQuestion = errors[1];
+    let inputQuestion = inputs[0];
+
+    //function texto de pergunta maior que 19 caracteres
+    validationQuestion(inputQuestion, spanQuestion);
+
+    //Cor vem pronta
+    let spanColor = errors[2];
+    let inputColor = inputs[1];
+
+    //function cor não pode ser #ffffff
+    validationColor(inputColor, spanColor);
+
+    //validação das respostas
+    validationAnswers(inputs, errors);
+
+    question = {
+        title: inputQuestion.value,
+        color: inputColor.value,
+        answers
+    }
+
+    createQuiz["questions"].push(question);
+
+    if (!err) {
+        renderCreateQuiz2(element.id);
+    }
+
+}
+
+function renderQuestions(x, obj) {
+    let forms = '';
+
+    for (let i = 1; i <= amountQuestion; i++) {
+        if (i == x) {
+            forms += form(x, obj);
+        } else {
+            forms += formClosed(1, i)
+        }
+    }
+
+    return forms;
+}
+
+function validationAnswers(inputs, errors) {
+    count = 0;
+    answers = [];
+    err = false;
+
+    //resposta correta
+    let spanCorrect = errors[4];
+    let inputCorrect = inputs[2];
+    // function resposta não pode estar vazia obrigatoriamente preenchida
+
+    validationCorrectAnswer(inputCorrect, spanCorrect);
+
+    //Validando URL com regex resposta correta
+    let spanUrl = errors[5];
+    let inputUrl = inputs[3];
+
+    validationUrl(inputUrl, spanUrl);
+
+    invalidationAnswers(inputs[4], inputs[5], errors[7]);
+
+    invalidationAnswers(inputs[6], inputs[7], errors[8]);
+
+    invalidationAnswers(inputs[8], inputs[9], errors[9]);
+
+    answers.push({
+        text: inputCorrect.value,
+        image: inputUrl.value,
+        isCorrectAnswer: true
+    })
+
+    if (err || count == 0) {
+        answers = [];
+        err = true;
+    }
+
+    if (count == 0) {
+        alert('Informe no mínimo uma resposta errada.')
+    }
+}
+
+function invalidationAnswers(inputText, inputUrl, span) {
+    if ((inputText.value != '' && inputUrl.value == '') || (inputText.value == '' && inputUrl.value != '')) {
+        span.innerHTML = 'Para a resposta ser válida preencha os dois campos.';
+        err = showError(inputText.parentNode, span);
+    } else {
+        hiddenError(inputText.parentNode, span);
+
+        if (inputText.value != '') {
+            validationUrl(inputUrl, span);
+
+            if (!err) {
+                answers.push({
+                    text: inputText.value,
+                    image: inputUrl.value,
+                    isCorrectAnswer: false
+                });
+
+                count++;
+            }
+        } else {
+            hiddenError(inputUrl, span);
+        }
+    }
+}
+
+// Tela 3
 function renderCreateQuiz3() {
     getScreenWidth();
 
@@ -154,6 +276,7 @@ function renderCreateQuiz3() {
     main.scrollIntoView();
 }
 
+// Tela 4
 function renderCreateQuiz4() {
     main.innerHTML = `
     <section class="register-quiz">
@@ -171,18 +294,23 @@ function renderCreateQuiz4() {
     document.querySelector("header").scrollIntoView();
 }
 
-function form() {
+// Formularios
+function form(number, obj) {
     return `
     <div class="form">
         <div>
-            <span>${'Pergunta 1'}</span>
+            <span>Pergunta ${number}</span>
             <input type="text" placeholder="Texto da pergunta" />
-            <input type="text" placeholder="Cor de fundo da pergunta" />
+            <span></span>
+            <input type="color" placeholder="Cor de fundo da pergunta" />
+            <span></span>
         </div>
         <div>
             <span>Resposta correta</span>
             <input type="text" placeholder="Resposta correta" />
+            <span></span>
             <input type="text" placeholder="URL da imagem" />
+            <span></span>
         </div>
         <div>
             <span>Resposta incorretas</span>
@@ -190,35 +318,32 @@ function form() {
             <div>
                 <input type="text" placeholder="Resposta incorreta" />
                 <input type="text" placeholder="URL da imagem" />
+                <span></span>
             </div>
 
             <div>
                 <input type="text" placeholder="Resposta incorreta" />
                 <input type="text" placeholder="URL da imagem" />
+                <span></span>
             </div>
 
             <div>
                 <input type="text" placeholder="Resposta incorreta" />
                 <input type="text" placeholder="URL da imagem" />
+                <span></span>
             </div>
         </div>
     </div>
     `
 }
 
-function formClosed(flag, amount) {
-    let questions = [];
-
-    for (let i = 1; i < amount; i++) {
-        questions += `
-        <div class="closed" onclick="alert(this)">
-            <span>${flag === 1 ? `Pergunta ${i + 1}` : `Nível ${i + 1}`}</span>
+function formClosed(flag, count) {
+    return `
+        <div class="closed" onclick="validationQuiz2(this)" id=${count}>
+            <span>${flag === 1 ? `Pergunta ${count}` : `Nível ${count}`}</span>
             <img src="img/pencil.png" />
         </div>
     `;
-    }
-
-    return questions;
 }
 
 function renderInputOrTextArea() {
@@ -275,8 +400,34 @@ function validationLevel(input, span) {
     }
 }
 
+function validationQuestion(input, span) {
+    if (input.value.split('').length < 20) {
+        span.innerHTML = 'A pergunta deve ter no mínimo 20 caracteres';
+        err = showError(input, span);
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function validationColor(input, span) {
+    if (input.value === "#ffffff") {
+        span.innerHTML = 'A cor não pode ser #FFFFFF';
+        err = showError(input, span);
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function validationCorrectAnswer(input, span) {
+    if (input.value.split('').length == "") {
+        span.innerHTML = 'A resposta não pode ficar vazia';
+        err = showError(input, span);
+    } else {
+        hiddenError(input, span);
+    }
+}
+
 function showError(input, span) {
-    input.value = '';
     input.classList.add('border-error', 'fade-in');
     span.classList.add('span-error', 'fade-in');
 
@@ -285,7 +436,9 @@ function showError(input, span) {
 
 function hiddenError(input, span) {
     span.innerHTML = '';
-    input.classList.remove('border-error');
+    input.classList.remove('border-error', 'fade-in');
+
+    return false;
 }
 
 function quizPage(element) {

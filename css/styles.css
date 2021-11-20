@@ -238,6 +238,7 @@ main{
 
 .border-error {
     border: solid 1px red !important;
+    padding: 20px;
 }
 
 .span-error {
@@ -254,6 +255,10 @@ main{
 	animation-iteration-count: 1;
 	animation-timing-function: ease-in;
 	animation-duration: 0.5s;
+}
+
+.reset {
+    all: unset;
 }
 
 @keyframes fadeInOpacity {
@@ -275,9 +280,7 @@ main{
     .user-quiz{
         margin-bottom: 35px;
     }
-}
 
-@media (max-width: 375px) {
     main {
         align-items: unset;
     }
