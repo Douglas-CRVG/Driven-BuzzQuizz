@@ -3,7 +3,9 @@ const main = document.querySelector("main");
 let createQuiz = {};
 let answers = [];
 let count = 0;
-
+let countCorrect = 0; // zerar
+let qntQuestions; // zerar
+let numberQuestions; // zerar
 let err = false;
 let vw;
 let amountQuestion;
@@ -436,6 +438,7 @@ function hiddenError(input, span) {
 }
 
 function getQuiz(element){
+    element.id = 59
     axios.get(`${URL_API}/quizzes/${element.id}`).then(quizPage)
 }
 
@@ -447,11 +450,13 @@ function quizPage(props) {
         questions,
         title
     } = props.data;
-    console.log(props.data)
+
+    qntQuestions = questions.length;
+    numberQuestions = qntQuestions;
 
     main.innerHTML = `
         <section class="open-quiz">
-            <div id="${id}" class="title style" style="background: linear-gradient(0deg, rgba(0, 0, 0, 0.57), rgba(0, 0, 0, 0.57)), url(${image});">
+            <div id="${id}" class="title" style="background: linear-gradient(0deg, rgba(0, 0, 0, 0.57), rgba(0, 0, 0, 0.57)), url(${image});">
                 <p>${title}</p>
             </div>
             <div class="container-questions">
@@ -459,6 +464,8 @@ function quizPage(props) {
             </div>
         </section>
     `;
+
+    document.querySelector("title").scrollIntoView();
 }
 
 function comparador() { 
@@ -467,7 +474,6 @@ function comparador() {
 
 function question (props) {
     let html = "";
-    console.log(props)
 
     props.map(prop =>{
         const {
@@ -493,8 +499,7 @@ function question (props) {
 }
 
 function answer(props){
-    let html = ""
-    console.log(props)
+    let html = "";
     props.map(prop => {
         const {
             image,
@@ -503,11 +508,50 @@ function answer(props){
         } = prop;
         
         html += `
-        <div id ="${isCorrectAnswer}" class="answers" onclick="alert(this)">
-            <img src="${image}" alt="${text}>"
+        <div id ="${isCorrectAnswer}" class="answers" onclick="reply(this)">
+            <img src="${image}" alt="${text}">
             <p>${text}</p>
         </div>
         `;
     });
     return html;
+}
+
+function reply(element){
+    const {
+        id,
+        parentNode,
+    } = element;
+
+    for(let i = 0; i < parentNode.childElementCount; i++ ){
+        let checked = parentNode.children[i];
+        checked.classList.add("block")
+        if(checked !== element){
+            checked.classList.add("opacity");
+        }
+
+        if(checked.id === "false"){
+            checked.classList.add("false");
+        } else {
+            checked.classList.add("true");
+        }
+    }
+    
+    if(id === "true"){
+        countCorrect++;        
+    }
+    
+    qntQuestions--;
+
+    if(qntQuestions === 0){
+        setTimeout(alert, 300, "acabou aqui, chama o ranking");
+    } else {
+        //scrollar para a próxima pergunta
+        setTimeout(scrollNextQuestion, 300, element);
+    }
+}
+
+function scrollNextQuestion(element){
+    let nextQuestion = element.parentNode.parentNode.nextElementSibling;
+    nextQuestion.scrollIntoView();
 }

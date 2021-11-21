@@ -336,14 +336,21 @@ main{
     font-weight: 700;
 }
 
-.true{
-    color: #009c22;
-}
-
 .false{
     color: #ff4b4b;
 }
 
+.true{
+    color: #009c22;
+}
+
+.opacity{
+    opacity: 0.6;
+}
+
+.block {
+    pointer-events: none;
+}
 
 .reset {
     all: unset;
