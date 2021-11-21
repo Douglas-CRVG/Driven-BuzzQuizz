@@ -289,6 +289,7 @@ main{
     gap: 30px;
 }
 
+.level-quiz,
 .question{
     width: 759px;
     padding: 28px 35px 36px;
@@ -296,6 +297,7 @@ main{
     box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.05);
 }
 
+.title-level-quiz,
 .title-question{
     width: 100%;
     padding: 55px;
@@ -305,6 +307,7 @@ main{
     word-break: break-all;
 }
 
+.title-level-quiz,
 .title-question p{
     font-size: 23px;
     font-weight: 700;
@@ -316,7 +319,8 @@ main{
     width: 100%;
     display: flex;
     flex-wrap: wrap;
-    gap: 18px 24px;
+    justify-content: space-between;
+    gap: 20px 0;
 }
 
 .answers{
@@ -350,6 +354,34 @@ main{
 
 .block {
     pointer-events: none;
+}
+
+.level-quiz{
+    padding: 20px 16px;
+    margin: 0 auto;
+}
+
+.title-level-quiz{
+    padding: 30px;
+    background-color: #EC362D;
+}
+
+.description-level-quiz{
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+.description-level-quiz img,
+.description-level-quiz p{
+    width: 48%;
+}
+
+.description-level-quiz p{
+    font-size: 19px;
+    font-weight: 700;
+    color: #484848;
+    word-break: break-all;
 }
 
 .reset {
@@ -420,6 +452,7 @@ main{
         font-size: 19px;
     }
 
+    .level-quiz,
     .question{
         width: 100%;
         padding: 14px 18px 18px;

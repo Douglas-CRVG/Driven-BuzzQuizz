@@ -6,6 +6,7 @@ let count = 0;
 let countCorrect = 0; // zerar
 let qntQuestions; // zerar
 let numberQuestions; // zerar
+let levelsQuiz; //zerar
 let err = false;
 let vw;
 let amountQuestion;
@@ -438,7 +439,6 @@ function hiddenError(input, span) {
 }
 
 function getQuiz(element){
-    element.id = 59
     axios.get(`${URL_API}/quizzes/${element.id}`).then(quizPage)
 }
 
@@ -453,6 +453,7 @@ function quizPage(props) {
 
     qntQuestions = questions.length;
     numberQuestions = qntQuestions;
+    levelsQuiz = levels;
 
     main.innerHTML = `
         <section class="open-quiz">
@@ -465,7 +466,7 @@ function quizPage(props) {
         </section>
     `;
 
-    document.querySelector("title").scrollIntoView();
+    document.querySelector(".title").scrollIntoView();
 }
 
 function comparador() { 
@@ -525,15 +526,11 @@ function reply(element){
 
     for(let i = 0; i < parentNode.childElementCount; i++ ){
         let checked = parentNode.children[i];
-        checked.classList.add("block")
+        
+        checked.classList.add("block", `${checked.id}`);
+
         if(checked !== element){
             checked.classList.add("opacity");
-        }
-
-        if(checked.id === "false"){
-            checked.classList.add("false");
-        } else {
-            checked.classList.add("true");
         }
     }
     
@@ -543,15 +540,48 @@ function reply(element){
     
     qntQuestions--;
 
+    setTimeout(scrollNext, 2000, element);
+}
+
+function scrollNext(element){
+    let nextQuestion = element.parentNode.parentNode.nextElementSibling;
+
     if(qntQuestions === 0){
-        setTimeout(alert, 300, "acabou aqui, chama o ranking");
+        levelQuiz();
+        document.querySelector(".level-quiz").scrollIntoView();                
     } else {
-        //scrollar para a próxima pergunta
-        setTimeout(scrollNextQuestion, 300, element);
+        nextQuestion.scrollIntoView();
     }
 }
 
-function scrollNextQuestion(element){
-    let nextQuestion = element.parentNode.parentNode.nextElementSibling;
-    nextQuestion.scrollIntoView();
+function levelQuiz(){
+    let successPercent = ((countCorrect/numberQuestions)*100);
+    let levelCorrect;
+    
+    for(let i = 0; i < levelsQuiz.length; i++){
+        let level = levelsQuiz[i];
+        if(level.minValue <= successPercent){
+            levelCorrect = level;            
+        }
+    }
+
+    const {
+        image,
+        text,
+        title
+    } = levelCorrect;
+
+    const section = document.querySelector(".open-quiz");
+    
+    section.innerHTML +=`
+    <div class="level-quiz">
+        <div class="title-level-quiz">
+            <p>${successPercent.toFixed(0)}% de acerto: ${title}</p>
+        </div>
+        <div class="description-level-quiz">
+            <img src="${image}" alt="${text}">
+            <p>${text}</p>
+        </div>
+    </div>
+    `;
 }
