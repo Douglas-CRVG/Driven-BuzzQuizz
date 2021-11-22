@@ -3,7 +3,12 @@ const main = document.querySelector("main");
 let createQuiz = {};
 let answers = [];
 let count = 0;
-
+let countCorrect = 0;
+let qntQuestions;
+let numberQuestions;
+let levelsQuiz;
+let currentId;
+let currentQuizId;
 let err = false;
 let vw;
 let amountQuestion;
@@ -26,35 +31,29 @@ function renderHome(props) {
             </div>
             <h1>Todos os Quizzes</h1>
             <div class="all-quizzes">
-                ${items(allQuizzes)}
+                ${renderQuiz(allQuizzes)}
             </div>
         </section>
     `;
 }
 
-function items(allQuizzes) {
-    let item = "";
-    for (let i = 0; i < allQuizzes.length; i++) {
-        item += renderQuiz(allQuizzes[i])
-    }
-
-    return item;
-}
-
 function renderQuiz(props) {
-    const {
-        image,
-        title,
-        id
-    } = props;
-
-    return `
-        <div id=${id} class="quiz"  style="background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="quizPage(this);">
-            <p>${title}</p>
-        </div>
-    `;
+    let html = "";
+    props.map(prop => {
+        const {
+            image,
+            title,
+            id
+        } = prop;
+    
+        html += `
+            <div id=${id} class="quiz"  style="background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="getQuiz(this);">
+                <p>${title}</p>
+            </div>
+        `;
+    });
+    return html;
 }
-
 
 // Tela 1
 function renderCreateQuiz() {
@@ -441,9 +440,172 @@ function hiddenError(input, span) {
     return false;
 }
 
-function quizPage(element) {
+function getQuiz(element){
+    axios.get(`${URL_API}/quizzes/${element.id}`).then(quizPage)
+}
+
+function quizPage(props) {
+    const {
+        id,
+        image,
+        levels,
+        questions,
+        title
+    } = props.data;
+
+    qntQuestions = questions.length;
+    numberQuestions = questions.length;
+    levelsQuiz = levels;
+    currentId = id;
+
     main.innerHTML = `
-        <p>Essa página ainda não foi construída</p>
-        <p>Mas sei que você apertou no no quiz ${element.id}</p>
+        <section class="open-quiz">
+            <div class="title" style="background: linear-gradient(0deg, rgba(0, 0, 0, 0.57), rgba(0, 0, 0, 0.57)), url(${image});">
+                <p>${title}</p>
+            </div>
+            <div class="container-questions">
+                ${question(questions)}
+            </div>
+        </section>
     `;
+
+    document.querySelector(".title").scrollIntoView();
+}
+
+function comparador() { 
+	return Math.random() - 0.5; 
+}
+
+function question (props) {
+    let html = "";
+
+    props.map(prop =>{
+        const {
+            answers,
+            color,
+            title
+        } = prop;
+    
+        answers.sort(comparador);
+    
+        html += `
+        <div class="question">
+            <div class="title-question" style="background-color: ${color}">
+                    <p>${title}</p>
+            </div>
+            <div class="container-answers">
+                ${answer(answers)}
+            </div>
+        </div>
+        `;
+    });
+    return html;    
+}
+
+function answer(props){
+    let html = "";
+    props.map(prop => {
+        const {
+            image,
+            isCorrectAnswer,
+            text
+        } = prop;
+        
+        html += `
+        <div id ="${isCorrectAnswer}" class="answers" onclick="reply(this)">
+            <img src="${image}" alt="${text}">
+            <p>${text}</p>
+        </div>
+        `;
+    });
+    return html;
+}
+
+function reply(element){
+    const {
+        id,
+        parentNode,
+    } = element;
+
+    for(let i = 0; i < parentNode.childElementCount; i++ ){
+        let checked = parentNode.children[i];
+        
+        checked.classList.add("block", `${checked.id}`);
+
+        if(checked !== element){
+            checked.classList.add("opacity");
+        }
+    }
+    
+    if(id === "true"){
+        countCorrect++;        
+    }
+    
+    qntQuestions--;
+
+    setTimeout(scrollNext, 2000, element);
+}
+
+function scrollNext(element){
+    let nextQuestion = element.parentNode.parentNode.nextElementSibling;
+
+    if(qntQuestions === 0){
+        levelQuiz();
+        document.querySelector(".level-quiz").scrollIntoView();
+        currentQuizId = currentId;
+        resetQuiz();
+    } else {
+        nextQuestion.scrollIntoView();
+    }
+}
+
+function levelQuiz(){
+    let successPercent = ((countCorrect/numberQuestions)*100);
+    let levelCorrect;
+    
+    for(let i = 0; i < levelsQuiz.length; i++){
+        let level = levelsQuiz[i];
+        if(level.minValue <= successPercent){
+            levelCorrect = level;            
+        }
+    }
+
+    const {
+        image,
+        text,
+        title
+    } = levelCorrect;
+
+    const section = document.querySelector(".open-quiz");
+    
+    section.innerHTML +=`
+    <div class="level-quiz">
+        <div class="title-level-quiz">
+            <p>${successPercent.toFixed(0)}% de acerto: ${title}</p>
+        </div>
+        <div class="description-level-quiz">
+            <img src="${image}" alt="${text}">
+            <p>${text}</p>
+        </div>
+    </div>
+    <div class="finish-quiz">
+        <button onclick="restartQuiz()">Reiniciar Quizz</button>
+        <button onclick="getQuizzes()">Voltar pra home</button>
+    </div>
+    `;
+}
+
+function restartQuiz(){
+    let quiz = {
+        id: currentQuizId
+    };
+    getQuiz(quiz)
+}
+
+function resetQuiz() {
+    countCorrect = 0;
+    qntQuestions = undefined;
+    numberQuestions = undefined;
+    levelsQuiz = undefined;
+    currentId = undefined;
 }
