@@ -3,10 +3,12 @@ const main = document.querySelector("main");
 let createQuiz = {};
 let answers = [];
 let count = 0;
-let countCorrect = 0; // zerar
-let qntQuestions; // zerar
-let numberQuestions; // zerar
-let levelsQuiz; //zerar
+let countCorrect = 0;
+let qntQuestions;
+let numberQuestions;
+let levelsQuiz;
+let currentId;
+let currentQuizId;
 let err = false;
 let vw;
 let amountQuestion;
@@ -452,12 +454,13 @@ function quizPage(props) {
     } = props.data;
 
     qntQuestions = questions.length;
-    numberQuestions = qntQuestions;
+    numberQuestions = questions.length;
     levelsQuiz = levels;
+    currentId = id;
 
     main.innerHTML = `
         <section class="open-quiz">
-            <div id="${id}" class="title" style="background: linear-gradient(0deg, rgba(0, 0, 0, 0.57), rgba(0, 0, 0, 0.57)), url(${image});">
+            <div class="title" style="background: linear-gradient(0deg, rgba(0, 0, 0, 0.57), rgba(0, 0, 0, 0.57)), url(${image});">
                 <p>${title}</p>
             </div>
             <div class="container-questions">
@@ -548,7 +551,9 @@ function scrollNext(element){
 
     if(qntQuestions === 0){
         levelQuiz();
-        document.querySelector(".level-quiz").scrollIntoView();                
+        document.querySelector(".level-quiz").scrollIntoView();
+        currentQuizId = currentId;
+        resetQuiz();
     } else {
         nextQuestion.scrollIntoView();
     }
@@ -583,5 +588,24 @@ function levelQuiz(){
             <p>${text}</p>
         </div>
     </div>
+    <div class="finish-quiz">
+        <button onclick="restartQuiz()">Reiniciar Quizz</button>
+        <button onclick="getQuizzes()">Voltar pra home</button>
+    </div>
     `;
+}
+
+function restartQuiz(){
+    let quiz = {
+        id: currentQuizId
+    };
+    getQuiz(quiz)
+}
+
+function resetQuiz() {
+    countCorrect = 0;
+    qntQuestions = undefined;
+    numberQuestions = undefined;
+    levelsQuiz = undefined;
+    currentId = undefined;
 }
