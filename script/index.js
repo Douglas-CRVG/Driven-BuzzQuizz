@@ -42,7 +42,6 @@ function renderHome(props) {
 function renderQuizzes(allQuizzes) {
     let listMyQuizzes = localStorage.getItem('myQuiz');
     let list = JSON.parse(listMyQuizzes);
-    let myQuiz = [];
     let quiz = [];
 
     if (list != null) {
@@ -70,7 +69,7 @@ function renderQuizzes(allQuizzes) {
             </div>
 
             <div class="all-quizzes">
-                ${renderQuiz(myQuiz)}
+                ${renderQuiz(quiz)}
              </div>
         `
     }
