@@ -26,31 +26,48 @@ function getQuizzes() {
 function renderHome(props) {
     window.scrollTo(0, 0);
     const allQuizzes = props.data;
+    
+    let quizzesAll;
+    let listMyQuizzes = [];
+    let list = JSON.parse(localStorage.getItem('myQuiz'));
 
+    if (list.length > 0) {
+
+        quizzesAll = allQuizzes.filter(quiz =>{
+            let count = 0;
+            for(let i=0; i<list.length; i++){
+                
+                if(quiz.id === list[i].id){
+                    count++;
+                }
+            }
+
+            if (count === 0){
+                return quiz
+            } else {
+                listMyQuizzes.push(quiz)
+            }
+        })
+       
+        console.log(quizzesAll);
+        console.log(listMyQuizzes);
+    }
+    
     main.innerHTML = `
         <section class="quiz-list">
-            ${renderQuizzes(allQuizzes)}          
+            ${renderMyQuizzes(listMyQuizzes)}          
             <br />
             <h1>Todos os Quizzes</h1>
             <div class="all-quizzes">
-                ${renderQuiz(allQuizzes, 2)}
+
+             ${renderQuiz(quizzesAll === undefined? allQuizzes : quizzesAll)}
+
             </div >
         </section >
         `;
 }
 
-function renderQuizzes(allQuizzes) {
-    let listMyQuizzes = localStorage.getItem('myQuiz');
-    let list = JSON.parse(listMyQuizzes);
-    let quiz = [];
-
-    if (list != null) {
-        for (let i = 0; i < list.length; i++) {
-            if (allQuizzes.filter(item => item.id == list[i].id)[0] != undefined) {
-                quiz.push(allQuizzes.filter(item => item.id == list[i].id)[0])
-            }
-        }
-    }
+function renderMyQuizzes(quiz) {
 
     if (quiz.length <= []) {
         localStorage.removeItem('myQuiz')
