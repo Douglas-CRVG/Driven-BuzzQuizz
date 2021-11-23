@@ -15,6 +15,7 @@ let vw;
 let amountQuestion;
 let amountLevel;
 let levelUserQuiz = [];
+let myQuiz;
 
 getQuizzes()
 function getQuizzes() {
@@ -43,22 +44,30 @@ function renderMyQuizzes(allQuizzes) {
     let list = JSON.parse(listMyQuizzes);
     let quiz = [];
 
-    for (let i = 0; i < list.length; i++) {
-        if (allQuizzes.filter(item => item.id == list[i].id)[0] != undefined) {
-            quiz.push(allQuizzes.filter(item => item.id == list[i].id)[0])
+    if (list != null) {
+        for (let i = 0; i < list.length; i++) {
+            if (allQuizzes.filter(item => item.id == list[i].id)[0] != undefined) {
+                quiz.push(allQuizzes.filter(item => item.id == list[i].id)[0])
+            }
         }
     }
 
-    if (quiz.length < 0) {
+    if (quiz.length <= []) {
         return `
             <div class="user-quiz">
-                <p>Você não criou nenhum quizz ainda :(</p>
-                <button onclick="renderCreateQuiz();">Criar Quizz</button>
+                <div>
+                    <p>Você não criou nenhum quizz ainda :(</p>
+                    <button onclick="renderCreateQuiz()">Criar Quizz</button>
+                </div>
             </div>
         `
     } else {
         return `
-            <h1>Meus Quizzes</h1>
+            <div class="my-quizzes">
+                <h1>Seus Quizzes</h1>
+                <ion-icon name="add-circle" onclick="renderCreateQuiz()"></ion-icon>
+            </div>
+
             <div class="all-quizzes">
                 ${renderQuiz(quiz)}
              </div>
@@ -76,7 +85,7 @@ function renderQuiz(props) {
         } = prop;
 
         html += `
-        <div id = ${id} class="quiz"  style = "background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick = "getQuiz(this);" >
+        <div id = ${id} class="quiz"  style = "background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="getQuiz(this);" >
             <p>${title}</p>
             </div>
         `;
@@ -451,19 +460,29 @@ function renderCreateQuiz4() {
     postQuizUser();
 
     main.innerHTML = `
-        <section class="register-quiz">
-        <p>Seu quizz está pronto!</p>
-        <div class="quizz-image-sucess">
-            <img src="https://revistacarro.com.br/wp-content/uploads/2021/06/Fiat-Pulse_1.jpg" />
-            <p>Titulo aqui</p>
+        <div class="loading">
+            <img src="img/loading.png" />
+            <p>Carregando</p>
         </div>
-        
-        <button class="button-create-quiz">Acessar Quizz</button>
-        <span class="link-back-home" onclick="getQuizzes();">Voltar pra home</span>
-    </section>
+    `
+
+    setTimeout(function () {
+        main.innerHTML = `
+        <section class="register-quiz">
+            <p>Seu quizz está pronto!</p>
+            <div class="quizz-image-sucess">
+                <img src="${myQuiz.image}" />
+                <p>${myQuiz.title}</p>
+            </div>
+            
+            <button class="button-create-quiz" onclick="getQuiz(this)" id=${myQuiz.id}>Acessar Quizz</button>
+            <span class="link-back-home" onclick="getQuizzes()">Voltar pra home</span>
+        </section>
         `;
 
-    document.querySelector("header").scrollIntoView();
+        document.querySelector("header").scrollIntoView();
+    }, 2000);
+
 }
 
 // Formularios
@@ -619,8 +638,8 @@ function getQuiz(element) {
 
 function postQuizUser() {
     axios.post(URL_API + "/quizzes", createQuiz).then((props) => {
-        console.log(props.data.id, props.data.key);
-        const myQuiz = {
+
+        myQuiz = {
             id: props.data.id,
             key: props.data.key,
             title: props.data.title,
@@ -645,6 +664,7 @@ function submit(obj) {
 }
 
 function quizPage(props) {
+    console.log(props.data.questions);
     const {
         id,
         image,
@@ -664,7 +684,7 @@ function quizPage(props) {
                 <p>${title}</p>
             </div>
             <div class="container-questions">
-                ${question(questions)}
+                ${questionQuiz(questions)}
             </div>
         </section>
         `;
@@ -676,7 +696,7 @@ function comparador() {
     return Math.random() - 0.5;
 }
 
-function question(props) {
+function questionQuiz(props) {
     let html = "";
 
     props.map(prop => {
