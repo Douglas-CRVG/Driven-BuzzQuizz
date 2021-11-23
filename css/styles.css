@@ -114,20 +114,56 @@ main{
 .quiz{
     width: 340px;
     height: 181px;
+
     border-radius: 5px;
+
     position: relative;
+
     background-size: 100% 100% !important;
+
     cursor: pointer;
+
     word-break: break-all;
 }
 
 .quiz p{
     width: 301px;
+
     font-size: 19px;
     color: #ffffff;
+
     position: absolute;
     bottom: 10px;
     left: 17px;
+}
+
+.quiz ion-icon {
+    position: absolute;
+    right: 0;
+
+    padding: 10px 12px;
+
+    height: 30px;
+    background-color: #EC362D;
+
+    color: white;
+    font-size: 40px;
+}
+
+.quiz ion-icon[name="create-outline"] {
+    top: 10%;
+
+    --ionicon-stroke-width: 50px;
+
+    border-radius: 10px 0px 0px 0px;
+}
+
+.quiz ion-icon[name="trash-outline"] {
+    top: 33%;
+
+    --ionicon-stroke-width: 30px;
+
+    border-radius: 10px 0px 0px 11px;
 }
 
 .register-quiz {

@@ -59,7 +59,9 @@ function renderHome(props) {
             <br />
             <h1>Todos os Quizzes</h1>
             <div class="all-quizzes">
-                ${renderQuiz(quizzesAll === undefined? allQuizzes : quizzesAll)}
+
+             ${renderQuiz(quizzesAll === undefined? allQuizzes : quizzesAll)}
+
             </div >
         </section >
         `;
@@ -68,6 +70,8 @@ function renderHome(props) {
 function renderMyQuizzes(quiz) {
 
     if (quiz.length <= []) {
+        localStorage.removeItem('myQuiz')
+
         return `
             <div class="user-quiz">
                 <div>
@@ -84,13 +88,13 @@ function renderMyQuizzes(quiz) {
             </div>
 
             <div class="all-quizzes">
-                ${renderQuiz(quiz)}
+                ${renderQuiz(quiz, 1)}
              </div>
         `
     }
 }
 
-function renderQuiz(props) {
+function renderQuiz(props, flag) {
     let html = "";
     props.map(prop => {
         const {
@@ -102,6 +106,7 @@ function renderQuiz(props) {
         html += `
         <div id = ${id} class="quiz"  style = "background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="getQuiz(this);" >
             <p>${title}</p>
+            ${flag === 1 ? `<ion-icon name="create-outline"></ion-icon> <ion-icon name="trash-outline" onclick="deleteQuiz(this)"></ion-icon>` : ``}
             </div>
         `;
     });
@@ -676,6 +681,22 @@ function submit(obj) {
 
     console.log(JSON.stringify(abc));
     console.log('getItem: ', dataLS);
+}
+
+function deleteQuiz(element) {
+    element = element.parentNode;
+    if (window.confirm('Você realmente deseja apagar seu Quiz?')) {
+        let listMyQuizzes = localStorage.getItem('myQuiz');
+        let list = JSON.parse(listMyQuizzes);
+
+        let itemList = list.filter(item => item.id == element.id);
+
+        axios.delete(`${URL_API}/quizzes/${itemList[0].id}`, {
+            headers: {
+                'Secret-Key': `${itemList[0].key}`
+            }
+        })
+    }
 }
 
 function quizPage(props) {
