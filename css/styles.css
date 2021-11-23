@@ -445,7 +445,7 @@ input{
     }
 
     .quiz p{
-        width: 100%;
+        width: 80%;
     }
 
     .register-quiz .form, .closed, .quizz-image-sucess, .quizz-image-sucess img  {

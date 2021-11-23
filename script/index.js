@@ -28,7 +28,7 @@ function renderHome(props) {
 
     main.innerHTML = `
         <section class="quiz-list">
-            ${renderMyQuizzes(allQuizzes)}          
+            ${renderQuizzes(allQuizzes)}          
             <br />
             <h1>Todos os Quizzes</h1>
             <div class="all-quizzes">
@@ -38,18 +38,18 @@ function renderHome(props) {
         `;
 }
 
-function renderMyQuizzes(allQuizzes) {
+function renderQuizzes(allQuizzes) {
     let listMyQuizzes = localStorage.getItem('myQuiz');
     let list = JSON.parse(listMyQuizzes);
-    let quiz = [];
+    let myQuiz = [];
 
     for (let i = 0; i < list.length; i++) {
         if (allQuizzes.filter(item => item.id == list[i].id)[0] != undefined) {
-            quiz.push(allQuizzes.filter(item => item.id == list[i].id)[0])
+            myQuiz.push(allQuizzes.filter(item => item.id == list[i].id)[0])
         }
     }
 
-    if (quiz.length < 0) {
+    if (myQuiz.length < 0) {
         return `
             <div class="user-quiz">
                 <p>Você não criou nenhum quizz ainda :(</p>
@@ -60,7 +60,7 @@ function renderMyQuizzes(allQuizzes) {
         return `
             <h1>Meus Quizzes</h1>
             <div class="all-quizzes">
-                ${renderQuiz(quiz)}
+                ${renderQuiz(myQuiz)}
              </div>
         `
     }
@@ -76,7 +76,7 @@ function renderQuiz(props) {
         } = prop;
 
         html += `
-        <div id = ${id} class="quiz"  style = "background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick = "getQuiz(this);" >
+        <div id=${id} class="quiz"  style="background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="getQuiz(this);" >
             <p>${title}</p>
             </div>
         `;
