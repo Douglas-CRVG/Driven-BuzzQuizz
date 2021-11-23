@@ -13,6 +13,7 @@ let err = false;
 let vw;
 let amountQuestion;
 let amountLevel;
+let levelUserQuiz = [];
 
 getQuizzes()
 function getQuizzes() {
@@ -121,12 +122,12 @@ function validationQuiz() {
 }
 
 // Tela 2
-function renderCreateQuiz2(number, obj) {
+function renderCreateQuiz2(number) {
     main.innerHTML = `
     <section class="register-quiz">
         <p>Crie suas perguntas</p>
 
-        ${renderQuestions(number == undefined ? 1 : number, obj)}
+        ${renderQuestions(number == undefined ? 1 : number, amountQuestion, 1)}
         
         <button onclick="renderCreateQuiz3();">Prosseguir pra criar níveis</button>
     </section>
@@ -169,14 +170,14 @@ function validationQuiz2(element) {
 
 }
 
-function renderQuestions(x, obj) {
+function renderQuestions(x, amount, flag) {
     let forms = '';
 
-    for (let i = 1; i <= amountQuestion; i++) {
+    for (let i = 1; i <= amount; i++) {
         if (i == x) {
-            forms += form(x, obj);
+            forms += flag==1? form(x) : formLevel(x)
         } else {
-            forms += formClosed(1, i)
+            forms += formClosed(flag, i)
         }
     }
 
@@ -249,30 +250,125 @@ function invalidationAnswers(inputText, inputUrl, span) {
 }
 
 // Tela 3
-function renderCreateQuiz3() {
+function renderCreateQuiz3(number) {
     getScreenWidth();
 
     main.innerHTML = `
     <section class="register-quiz">
         <p>Agora, decida os níveis</p>
 
-        <div class="form">
-            <div>
-                <span>Nível 1</span>
-                <input type="text" placeholder="Título do nível" />
-                <input type="text" placeholder="% de acerto mínima" />
-                <input type="text" placeholder="URL da imagem do nível" />
-                ${renderInputOrTextArea()}
-            </div>
-        </div>
-
-        ${formClosed(2, amountLevel)}
+        ${renderQuestions(number === undefined? 1 : number, amountLevel, 2)}
         
-        <button onclick="renderCreateQuiz4();">Prosseguir pra criar níveis</button>
+        <button onclick="validationLevelUser();">Finalizar Quizz</button>
     </section>
     `;
 
     main.scrollIntoView();
+}
+
+function formLevel(x){
+    return `
+    <div class="form">
+            <div>
+                <span>Nível ${x}</span>
+                <input type="text" placeholder="Título do nível" />
+                <span></span>
+                <input type="number" placeholder="% de acerto mínima" min="0" max="100"/>
+                <span></span>
+                <input type="text" placeholder="URL da imagem do nível" />
+                <span></span>
+                ${renderInputOrTextArea()}
+                <span></span>
+            </div>
+    </div>
+    `;
+}
+
+function validationLevelTitle(input, span){
+    
+    if (input.value.split('').length < 10) {
+        span.innerHTML = 'Mínimo de 10 caracteres';
+        err = showError(input, span);
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function validationMinValue(input, span){
+    
+    if (!(input.value >= 0 && input.value <= 100) || input.value === "") {
+        span.innerHTML = 'A porcentagem de acerto deve ser um número entre 0 e 100';
+        err = showError(input, span);
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function validationDescription(input, span){
+    
+    if (input.value.split('').length < 30) {
+        span.innerHTML = 'Mínimo de 30 caracteres';
+        err = showError(input, span);
+    } else {
+        hiddenError(input, span);
+    }
+}
+
+function validationLevelUser(element){
+    console.log("apertou o botão")
+    err = false;
+    let inputs = document.querySelectorAll('.form input');
+    let errors = document.querySelectorAll('.form span');
+    let percents = [];
+
+    let inputTitle = inputs[0];
+    let spanTitle = errors[1];
+    
+    //verifica tamanho do título do nível
+    validationLevelTitle(inputTitle, spanTitle);
+
+    let inputPercent = inputs[1];
+    let spanPercent = errors[2];
+
+    //verifica percentual de acerto
+    validationMinValue(inputPercent, spanPercent);
+
+    if(!(spanPercent.classList.contains('span-error'))){
+        
+        levelUserQuiz.push(inputPercent.value);
+    }
+
+    let inputUrl = inputs[2];
+    let spanUrl = errors[3];
+
+    //verifica URL
+    validationUrl(inputUrl, spanUrl); 
+
+    let inputDescription = document.querySelector("#description");
+    let spanDescription = errors[4];
+    validationDescription(inputDescription, spanDescription);
+
+    console.log("tem erro? "+err)
+    if (!err){
+        level = {
+            title: inputTitle.value,
+            image: inputUrl.value,
+            text: inputDescription.value,
+            minValue: inputPercent.value
+        };
+
+        let valid = levelUserQuiz.filter(percent => percent==0 ).length > 0? true : false;
+
+        if (levelUserQuiz.length === amountLevel && valid) {
+            console.log ("entrei valid")
+                    
+        }
+        createQuiz["levels"].push(level);
+        console.log(createQuiz)
+        renderCreateQuiz3(element.id)
+        
+    }
+
 }
 
 // Tela 4
@@ -294,7 +390,7 @@ function renderCreateQuiz4() {
 }
 
 // Formularios
-function form(number, obj) {
+function form(number) {
     return `
     <div class="form">
         <div>
@@ -338,7 +434,7 @@ function form(number, obj) {
 
 function formClosed(flag, count) {
     return `
-        <div class="closed" onclick="validationQuiz2(this)" id=${count}>
+        <div class="closed" onclick="${flag === 1 ? `validationQuiz2(this)` : `validationLevelUser(this)`}" id=${count}>
             <span>${flag === 1 ? `Pergunta ${count}` : `Nível ${count}`}</span>
             <img src="img/pencil.png" />
         </div>
@@ -347,9 +443,9 @@ function formClosed(flag, count) {
 
 function renderInputOrTextArea() {
     if (vw <= 375) {
-        return `<textarea placeholder="Descrição do nível"></textarea>`
+        return `<textarea id="description" placeholder="Descrição do nível"></textarea>`
     } else {
-        return `<input type="text" placeholder="Descrição do nível" />`
+        return `<input id="description" type="text" placeholder="Descrição do nível" />`
     }
 }
 
