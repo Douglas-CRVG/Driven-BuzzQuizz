@@ -22,7 +22,6 @@ function getQuizzes() {
     axios.get(`${URL_API}/quizzes`).then(renderHome);
 }
 
-// div.user-quiz ainda será fraciona a uma função a parte, mas só acontecerá após a parte de o usuário criar seu próprio quiz
 function renderHome(props) {
     window.scrollTo(0, 0);
     const allQuizzes = props.data;
@@ -58,7 +57,7 @@ function renderHome(props) {
             ${renderMyQuizzes(listMyQuizzes)}          
             <br />
             <h1>Todos os Quizzes</h1>
-            <div class="all-quizzes">
+            <div class="all-quizzes" data-identifier="general-quizzes">
                 ${renderQuiz(quizzesAll === undefined? allQuizzes : quizzesAll)}
             </div >
         </section >
@@ -74,7 +73,7 @@ function renderMyQuizzes(quiz) {
             <div class="user-quiz">
                 <div>
                     <p>Você não criou nenhum quizz ainda :(</p>
-                    <button onclick="renderCreateQuiz()">Criar Quizz</button>
+                    <button onclick="renderCreateQuiz()" data-identifier="create-quizz">Criar Quizz</button>
                 </div>
             </div>
         `
@@ -82,9 +81,9 @@ function renderMyQuizzes(quiz) {
         return `
             <div class="my-quizzes">
                 <h1>Seus Quizzes</h1>
-                <ion-icon name="add-circle" onclick="renderCreateQuiz()"></ion-icon>
+                <ion-icon name="add-circle" onclick="renderCreateQuiz()" data-identifier="create-quizz"></ion-icon>
             </div>
-            <div class="all-quizzes">
+            <div class="all-quizzes" data-identifier="user-quizzes">
                 ${renderQuiz(quiz, 1)}
              </div>
         `
@@ -101,7 +100,7 @@ function renderQuiz(props, flag) {
         } = prop;
 
         html += `
-        <div id = ${id} class="quiz"  style = "background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="getQuiz(this);" >
+        <div id = ${id} class="quiz"  style = "background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="getQuiz(this);" data-identifier="quizz-card" >
             <p>${title}</p>
             ${flag === 1 ? `<ion-icon name="create-outline"></ion-icon> <ion-icon name="trash-outline" onclick="deleteQuiz(this)"></ion-icon>` : ``}
             </div>
@@ -358,7 +357,7 @@ function renderCreateQuiz3(number) {
 
 function formLevel(x) {
     return `
-        <div class="form">
+        <div class="form"data-identifier="level">
             <div>
                 <span>Nível ${x}</span>
                 <input type="text" placeholder="Título do nível" />
@@ -505,7 +504,7 @@ function renderCreateQuiz4() {
 // Formularios
 function form(number) {
     return `
-        <div class="form">
+        <div class="form" data-identifier="question">
         <div>
             <span>Pergunta ${number}</span>
             <input type="text" placeholder="Texto da pergunta" />
@@ -547,7 +546,7 @@ function form(number) {
 
 function formClosed(flag, count) {
     return `
-        <div class="closed" onclick = "${flag === 1 ? `validationQuiz2(this)` : `validationLevelUser(this)`}" id = ${count}>
+        <div class="closed" onclick = "${flag === 1 ? `validationQuiz2(this)` : `validationLevelUser(this)`}" id = ${count} data-identifier="expand">
             <span>${flag === 1 ? `Pergunta ${count}` : `Nível ${count}`}</span>
             <img src="img/pencil.png" />
         </div>
@@ -742,7 +741,7 @@ function questionQuiz(props) {
         answers.sort(comparador);
 
         html += `
-        <div class="question">
+        <div class="question" data-identifier="question">
             <div class="title-question" style="background-color: ${color}">
                 <p>${title}</p>
             </div>
@@ -765,7 +764,7 @@ function answer(props) {
         } = prop;
 
         html += `
-        <div id = "${isCorrectAnswer}" class="answers" onclick="reply(this)">
+        <div id = "${isCorrectAnswer}" class="answers" onclick="reply(this)" data-identifier="answer">
             <img src="${image}" alt="${text}">
                 <p>${text}</p>
         </div>
@@ -832,7 +831,7 @@ function levelQuiz() {
     const section = document.querySelector(".open-quiz");
 
     section.innerHTML += `
-        <div class="level-quiz">
+    <div class="level-quiz" data-identifier="quizz-result">
         <div class="title-level-quiz">
             <p>${successPercent.toFixed(0)}% de acerto: ${title}</p>
         </div>
