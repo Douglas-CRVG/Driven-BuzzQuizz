@@ -411,6 +411,10 @@ main{
     all: unset;
 }
 
+input{
+    height: 19px;
+}
+
 @keyframes fadeInOpacity {
     0% {
 		opacity: 0;
@@ -435,6 +439,10 @@ main{
         align-items: unset;
     }
 
+    .quiz p{
+        width: 100%;
+    }
+
     .register-quiz .form, .closed, .quizz-image-sucess, .quizz-image-sucess img  {
         width: 100%;
     }
@@ -447,7 +455,6 @@ main{
 
     .register-quiz button {
         margin-top: 29px;
-
         font-size: 18px;
     }
 
