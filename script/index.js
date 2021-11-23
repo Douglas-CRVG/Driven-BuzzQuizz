@@ -81,32 +81,34 @@ function validationQuiz() {
     let errors = inputs[0].parentNode.querySelectorAll('span');
 
     //Validando o title
-    let spanTitle = errors[0];
+    let spanTitle = errors[0];    
+    let textTitle = "Título inválido";
     let inputTitle = inputs[0];
-
-    validationTitle(inputTitle, spanTitle);
+    let conditionTitle = (inputTitle.value.split('').length < 19 || inputTitle.value.split('').length > 65);
+    validationInputs(inputTitle, spanTitle, conditionTitle, textTitle)
 
     //Validando URL com regex
     let spanUrl = errors[1];
     let inputUrl = inputs[1];
-
     validationUrl(inputUrl, spanUrl);
 
     //Validando quantidade de perguntas
     amountQuestion = document.querySelector('.register-quiz .form input[name="amountQuestion"]').value;
 
     let spanQuestions = errors[2];
+    let textQuestions = 'Quantidade de perguntas tem que ser no mínimo três';
     let inputQuestions = inputs[2];
-
-    validationQuestions(inputQuestions, spanQuestions);
+    let conditionQuestions = (amountQuestion < 3);
+    validationInputs(inputQuestions, spanQuestions, conditionQuestions, textQuestions);
 
     // Validando quantidade de niveis
     amountLevel = document.querySelector('.register-quiz .form input[name="amountLevel"]').value;
 
     let spanLevels = errors[3];
+    let textLevels = 'Quantidade de níveis tem que ser no minímo duas';
     let inputLevels = inputs[3];
-
-    validationLevel(inputLevels, spanLevels);
+    let conditionLevels = amountLevel < 2;
+    validationInputs(inputLevels, spanLevels, conditionLevels, textLevels);
 
     if (!err) {
         createQuiz = {
@@ -115,7 +117,6 @@ function validationQuiz() {
             questions: [],
             levels: [],
         }
-
         renderCreateQuiz2();
     }
 }
@@ -140,19 +141,25 @@ function validationQuiz2(element) {
 
     //Validando pergunta
     let spanQuestion = errors[1];
+    let textQuestion = 'A pergunta deve ter no mínimo 20 caracteres';
     let inputQuestion = inputs[0];
+    let conditionQuestion = (inputQuestion.value.split('').length < 20)
 
     //function texto de pergunta maior que 19 caracteres
-    validationQuestion(inputQuestion, spanQuestion);
+    validationInputs (inputQuestion, spanQuestion, conditionQuestion, textQuestion);
+    //validationQuestion(inputQuestion, spanQuestion);
 
     //Cor vem pronta
     let spanColor = errors[2];
+    let textColor = 'A cor não pode ser #FFFFFF';
     let inputColor = inputs[1];
+    let conditionColor = (inputColor.value === "#ffffff");
 
     //function cor não pode ser #ffffff
-    validationColor(inputColor, spanColor);
+    validationInputs (inputColor, spanColor, conditionColor, textColor);
+    //validationColor(inputColor, spanColor);
 
-    //validação das respostas
+    //validação das respostas hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh
     validationAnswers(inputs, errors);
 
     question = {
@@ -188,24 +195,26 @@ function validationAnswers(inputs, errors) {
     answers = [];
     err = false;
 
-    //resposta correta
-    let spanCorrect = errors[4];
-    let inputCorrect = inputs[2];
-    // function resposta não pode estar vazia obrigatoriamente preenchida
-
-    validationCorrectAnswer(inputCorrect, spanCorrect);
-
-    //Validando URL com regex resposta correta
-    let spanUrl = errors[5];
-    let inputUrl = inputs[3];
-
-    validationUrl(inputUrl, spanUrl);
-
     invalidationAnswers(inputs[4], inputs[5], errors[7]);
 
     invalidationAnswers(inputs[6], inputs[7], errors[8]);
 
     invalidationAnswers(inputs[8], inputs[9], errors[9]);
+    
+    //resposta correta
+    let spanCorrect = errors[4];
+    let textCorrect = 'A resposta não pode ficar vazia';
+    let inputCorrect = inputs[2];
+    let conditionCorrect = (inputCorrect.value.split('').length == "");
+    validationInputs(inputCorrect, spanCorrect, conditionCorrect, textCorrect);
+    //validationCorrectAnswer(inputCorrect, spanCorrect);
+
+    //Validando URL com regex resposta correta
+    let spanUrl = errors[5];
+    let inputUrl = inputs[3];
+    validationUrl(inputUrl, spanUrl);
+
+    
 
     answers.push({
         text: inputCorrect.value,
@@ -224,6 +233,7 @@ function validationAnswers(inputs, errors) {
 }
 
 function invalidationAnswers(inputText, inputUrl, span) {
+    err = false;
     if ((inputText.value != '' && inputUrl.value == '') || (inputText.value == '' && inputUrl.value != '')) {
         span.innerHTML = 'Para a resposta ser válida preencha os dois campos.';
         err = showError(inputText.parentNode, span);
@@ -241,6 +251,7 @@ function invalidationAnswers(inputText, inputUrl, span) {
                 });
 
                 count++;
+                console.log(count)
             }
         } else {
             hiddenError(inputUrl, span);
@@ -313,27 +324,24 @@ function form(number, obj) {
         </div>
         <div>
             <span>Resposta incorretas</span>
-
-            <div>
-                <input type="text" placeholder="Resposta incorreta" />
-                <input type="text" placeholder="URL da imagem" />
-                <span></span>
-            </div>
-
-            <div>
-                <input type="text" placeholder="Resposta incorreta" />
-                <input type="text" placeholder="URL da imagem" />
-                <span></span>
-            </div>
-
-            <div>
-                <input type="text" placeholder="Resposta incorreta" />
-                <input type="text" placeholder="URL da imagem" />
-                <span></span>
-            </div>
+            ${formAnswersIncorrect()}
         </div>
     </div>
     `
+}
+
+function formAnswersIncorrect(){
+    let html ="";
+    for(let i = 0; i < 3; i++){
+        html += `
+        <div>
+            <input type="text" placeholder="Resposta incorreta" />
+            <input type="text" placeholder="URL da imagem" />
+            <span></span>
+        </div>
+        `;
+    }
+    return html;
 }
 
 function formClosed(flag, count) {
@@ -358,72 +366,23 @@ function getScreenWidth() {
 }
 
 // Validacao dos errors
-function validationTitle(input, span) {
-    if (input.value.split('').length < 19 || input.value.split('').length > 65) {
-        span.innerHTML = 'Título inválido';
+function validationInputs(input, span, condition, text){
+    if (condition) {
+        span.innerHTML = text;
         err = showError(input, span);
     } else {
         hiddenError(input, span);
-    }
+    }    
 }
 
 function validationUrl(input, span) {
     let expression = /([a-z\-_0-9\/\:\.]*\.(jpg|jpeg|png|gif))/i;
     let regex = new RegExp(expression);
 
-    if (!input.value.match(regex)) {
-        span.innerHTML = 'URL inválida';
-        err = showError(input, span);
-    } else {
-        hiddenError(input, span);
-    }
-}
+    let condition = (!input.value.match(regex));
+    let text = 'URL inválida';
 
-function validationQuestions(input, span) {
-    if (amountQuestion < 3) {
-        span.innerHTML = 'Quantidade de perguntas tem que ser no mínimo três';
-        err = showError(input, span);
-
-    } else {
-        hiddenError(input, span);
-    }
-}
-
-function validationLevel(input, span) {
-    if (amountLevel < 2) {
-        span.innerHTML = 'Quantidade de níveis tem que ser no minímo duas';
-        err = showError(input, span);
-
-    } else {
-        hiddenError(input, span);
-    }
-}
-
-function validationQuestion(input, span) {
-    if (input.value.split('').length < 20) {
-        span.innerHTML = 'A pergunta deve ter no mínimo 20 caracteres';
-        err = showError(input, span);
-    } else {
-        hiddenError(input, span);
-    }
-}
-
-function validationColor(input, span) {
-    if (input.value === "#ffffff") {
-        span.innerHTML = 'A cor não pode ser #FFFFFF';
-        err = showError(input, span);
-    } else {
-        hiddenError(input, span);
-    }
-}
-
-function validationCorrectAnswer(input, span) {
-    if (input.value.split('').length == "") {
-        span.innerHTML = 'A resposta não pode ficar vazia';
-        err = showError(input, span);
-    } else {
-        hiddenError(input, span);
-    }
+    validationInputs(input, span, condition, text);
 }
 
 function showError(input, span) {

@@ -411,6 +411,10 @@ main{
     all: unset;
 }
 
+input[type="color"]{
+    height: 19px;
+}
+
 @keyframes fadeInOpacity {
     0% {
 		opacity: 0;

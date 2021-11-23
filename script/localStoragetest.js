@@ -1,8 +1,8 @@
 function postQuizUser(){
     axios.post(URL_API + "/quizzes", createQuiz).then((props)=>{
         const myQuiz = {
-            id: props.id,
-            key: props.key
+            id: props.data.id,
+            key: props.data.key
         }
         submit(myQuiz)
     });
@@ -11,7 +11,7 @@ function postQuizUser(){
 function submit(obj){
     let abc = [];
     let dataLS = JSON.parse(localStorage.getItem('myQuiz'));
-    if (dataLS !== null){
+    if (dataLS !== null && dataLS != {}){
         dataLS.map(item=> abc.push(item))
     }
 
