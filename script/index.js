@@ -17,11 +17,22 @@ let amountLevel;
 let levelUserQuiz = [];
 let myQuiz;
 
-getQuizzes()
+loadingInitial()
 function getQuizzes() {
     axios.get(`${URL_API}/quizzes`).then(renderHome);
 }
 
+function loadingInitial() {
+    main.innerHTML = `
+    <div class="loading">
+        <img src="img/loading.png" />
+        <p>Carregando</p>
+    </div>
+    `
+    setTimeout(() => {
+        getQuizzes()
+    }, 1000)
+}
 // div.user-quiz ainda será fraciona a uma função a parte, mas só acontecerá após a parte de o usuário criar seu próprio quiz
 function renderHome(props) {
     window.scrollTo(0, 0);
@@ -40,6 +51,7 @@ function renderHome(props) {
 }
 
 function renderQuizzes(allQuizzes) {
+
     let listMyQuizzes = localStorage.getItem('myQuiz');
     let list = JSON.parse(listMyQuizzes);
     let quiz = [];
@@ -87,11 +99,11 @@ function renderQuiz(props, flag) {
         } = prop;
 
         html += `
-        <div id = ${id} class="quiz"  style = "background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="getQuiz(this);" >
-            <p>${title}</p>
-            ${flag === 1 ? `<ion-icon name="create-outline"></ion-icon> <ion-icon name="trash-outline" onclick="deleteQuiz(this)"></ion-icon>` : ``}
-            </div>
-        `;
+                <div id = ${id} class="quiz"  style = "background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="getQuiz(this);" >
+                    <p>${title}</p>
+                    ${flag === 1 ? `<ion-icon name="create-outline"></ion-icon> <ion-icon name="trash-outline" onclick="deleteQuiz(this)"></ion-icon>` : ``}
+                    </div>
+                `;
     });
     return html;
 }
@@ -679,6 +691,16 @@ function deleteQuiz(element) {
                 'Secret-Key': `${itemList[0].key}`
             }
         })
+
+        main.innerHTML = `
+        <div class="loading">
+            <img src="img/loading.png" />
+            <p>Carregando</p>
+        </div>
+        `
+        setTimeout(() => {
+            document.location.reload(true);
+        }, 500)
     }
 }
 
