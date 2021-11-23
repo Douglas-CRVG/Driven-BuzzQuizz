@@ -10,6 +10,7 @@ let levelsQuiz;
 let currentId;
 let currentQuizId;
 let err = false;
+let itemForm = [];
 let vw;
 let amountQuestion;
 let amountLevel;
@@ -22,20 +23,47 @@ function getQuizzes() {
 
 // div.user-quiz ainda será fraciona a uma função a parte, mas só acontecerá após a parte de o usuário criar seu próprio quiz
 function renderHome(props) {
+    window.scrollTo(0, 0);
     const allQuizzes = props.data;
 
     main.innerHTML = `
         <section class="quiz-list">
+            ${renderMyQuizzes(allQuizzes)}          
+            <br />
+            <h1>Todos os Quizzes</h1>
+            <div class="all-quizzes">
+                ${renderQuiz(allQuizzes)}
+            </div >
+        </section >
+        `;
+}
+
+function renderMyQuizzes(allQuizzes) {
+    let listMyQuizzes = localStorage.getItem('myQuiz');
+    let list = JSON.parse(listMyQuizzes);
+    let quiz = [];
+
+    for (let i = 0; i < list.length; i++) {
+        if (allQuizzes.filter(item => item.id == list[i].id)[0] != undefined) {
+            quiz.push(allQuizzes.filter(item => item.id == list[i].id)[0])
+        }
+    }
+
+    if (quiz.length < 0) {
+        return `
             <div class="user-quiz">
                 <p>Você não criou nenhum quizz ainda :(</p>
                 <button onclick="renderCreateQuiz();">Criar Quizz</button>
             </div>
-            <h1>Todos os Quizzes</h1>
+        `
+    } else {
+        return `
+            <h1>Meus Quizzes</h1>
             <div class="all-quizzes">
-                ${renderQuiz(allQuizzes)}
-            </div>
-        </section>
-    `;
+                ${renderQuiz(quiz)}
+             </div>
+        `
+    }
 }
 
 function renderQuiz(props) {
@@ -46,10 +74,10 @@ function renderQuiz(props) {
             title,
             id
         } = prop;
-    
+
         html += `
-            <div id=${id} class="quiz"  style="background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick="getQuiz(this);">
-                <p>${title}</p>
+        <div id = ${id} class="quiz"  style = "background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, rgba(0, 0, 0, 0.5) 65.1%, #000000 100%), url(${image})" onclick = "getQuiz(this);" >
+            <p>${title}</p>
             </div>
         `;
     });
@@ -59,7 +87,7 @@ function renderQuiz(props) {
 // Tela 1
 function renderCreateQuiz() {
     main.innerHTML = `
-    <section class="register-quiz">
+        <section class="register-quiz">
         <p>Comece pelo começo</p>
         <div class="form">
             <input type="text" name="title" placeholder="Título do seu quizz" />
@@ -72,8 +100,8 @@ function renderCreateQuiz() {
             <span></span>
         </div>
         <button onclick="validationQuiz();">Prosseguir pra criar perguntas</button>
-    </section>    
-    `;
+    </section>
+        `;
 }
 
 function validationQuiz() {
@@ -124,20 +152,89 @@ function validationQuiz() {
 // Tela 2
 function renderCreateQuiz2(number) {
     main.innerHTML = `
-    <section class="register-quiz">
-        <p>Crie suas perguntas</p>
+        <section class="register-quiz">
+            <p>Crie suas perguntas</p>
 
         ${renderQuestions(number == undefined ? 1 : number, amountQuestion, 1)}
-        
-        <button onclick="renderCreateQuiz3();">Prosseguir pra criar níveis</button>
+
+    <button onclick="validationQuiz2(this);">Prosseguir pra criar níveis</button>
     </section>
-    `;
+        `;
+}
+
+function checkFormConfirmation(element) {
+    itemsForm = []
+
+    if (element.localName == 'button') {
+        itemsForm.push(element.parentNode.querySelectorAll(".form input"));
+        itemsForm.push(element.parentNode.querySelectorAll(".form span"));
+    } else {
+        itemsForm.push(document.querySelectorAll('.form input'))
+        itemsForm.push(document.querySelectorAll('.form span'));
+    }
 }
 
 function validationQuiz2(element) {
     err = false;
-    let inputs = document.querySelectorAll('.form input');
-    let errors = document.querySelectorAll('.form span');
+
+    // Verifica se o elemento clicado é um button
+    checkFormConfirmation(element);
+
+    let inputs = itemsForm[0];
+    let errors = itemsForm[1];
+
+    //validação das respostas
+    validationAnswers(inputs, errors);
+
+    if (!err) {
+        if (element.localName == 'button') {
+            if (createQuiz.questions.length < 2) {
+                alert('Você precisa de no mínimo 3 questões cadastradas para ir para a próxima etapa.')
+
+            } else {
+                question = {
+                    title: inputs[0].value,
+                    color: inputs[1].value,
+                    answers
+                }
+                createQuiz["questions"].push(question);
+                renderCreateQuiz3();
+
+            }
+        } else {
+            // Se clicar no button ele vai pra prox page se não ele abre o form que esta fechado.
+            question = {
+                title: inputs[0].value,
+                color: inputs[1].value,
+                answers
+            }
+            createQuiz["questions"].push(question);
+            renderCreateQuiz2(element.id);
+
+        }
+    }
+
+    console.log(createQuiz)
+}
+
+function renderQuestions(x, amount, flag) {
+    let forms = '';
+
+    for (let i = 1; i <= amount; i++) {
+        if (i == x) {
+            forms += flag == 1 ? form(x) : formLevel(x)
+        } else {
+            forms += formClosed(flag, i)
+        }
+    }
+
+    return forms;
+}
+
+function validationAnswers(inputs, errors) {
+    count = 0;
+    answers = [];
+    err = false;
 
     //Validando pergunta
     let spanQuestion = errors[1];
@@ -152,42 +249,6 @@ function validationQuiz2(element) {
 
     //function cor não pode ser #ffffff
     validationColor(inputColor, spanColor);
-
-    //validação das respostas
-    validationAnswers(inputs, errors);
-
-    question = {
-        title: inputQuestion.value,
-        color: inputColor.value,
-        answers
-    }
-
-    createQuiz["questions"].push(question);
-
-    if (!err) {
-        renderCreateQuiz2(element.id);
-    }
-
-}
-
-function renderQuestions(x, amount, flag) {
-    let forms = '';
-
-    for (let i = 1; i <= amount; i++) {
-        if (i == x) {
-            forms += flag==1? form(x) : formLevel(x)
-        } else {
-            forms += formClosed(flag, i)
-        }
-    }
-
-    return forms;
-}
-
-function validationAnswers(inputs, errors) {
-    count = 0;
-    answers = [];
-    err = false;
 
     //resposta correta
     let spanCorrect = errors[4];
@@ -214,13 +275,17 @@ function validationAnswers(inputs, errors) {
         isCorrectAnswer: true
     })
 
-    if (err || count == 0) {
+    // Verifica se tem 0 respostas erradas
+    if (count == 0) {
+        alert('Informe no mínimo uma resposta errada.')
         answers = [];
         err = true;
     }
 
-    if (count == 0) {
-        alert('Informe no mínimo uma resposta errada.')
+    // Verifica se tem erro em algum input
+    if (err) {
+        answers = [];
+        err = true;
     }
 }
 
@@ -233,6 +298,7 @@ function invalidationAnswers(inputText, inputUrl, span) {
 
         if (inputText.value != '') {
             validationUrl(inputUrl, span);
+            count++;
 
             if (!err) {
                 answers.push({
@@ -240,8 +306,6 @@ function invalidationAnswers(inputText, inputUrl, span) {
                     image: inputUrl.value,
                     isCorrectAnswer: false
                 });
-
-                count++;
             }
         } else {
             hiddenError(inputUrl, span);
@@ -254,38 +318,37 @@ function renderCreateQuiz3(number) {
     getScreenWidth();
 
     main.innerHTML = `
-    <section class="register-quiz">
-        <p>Agora, decida os níveis</p>
+        <section class="register-quiz">
+            <p>Agora, decida os níveis</p>
 
-        ${renderQuestions(number === undefined? 1 : number, amountLevel, 2)}
-        
-        <button onclick="validationLevelUser();">Finalizar Quizz</button>
-    </section>
-    `;
+        ${renderQuestions(number === undefined ? 1 : number, amountLevel, 2)}
+
+    <button onclick="validationLevelUser(this);">Finalizar Quizz</button>
+    </section >
+        `;
 
     main.scrollIntoView();
 }
 
-function formLevel(x){
+function formLevel(x) {
     return `
-    <div class="form">
+        <div class="form">
             <div>
                 <span>Nível ${x}</span>
                 <input type="text" placeholder="Título do nível" />
                 <span></span>
-                <input type="number" placeholder="% de acerto mínima" min="0" max="100"/>
+                <input type="number" placeholder="% de acerto mínima" min="0" max="100" />
                 <span></span>
                 <input type="text" placeholder="URL da imagem do nível" />
                 <span></span>
                 ${renderInputOrTextArea()}
                 <span></span>
             </div>
-    </div>
-    `;
+    </div >
+        `;
 }
 
-function validationLevelTitle(input, span){
-    
+function validationLevelTitle(input, span) {
     if (input.value.split('').length < 10) {
         span.innerHTML = 'Mínimo de 10 caracteres';
         err = showError(input, span);
@@ -294,8 +357,7 @@ function validationLevelTitle(input, span){
     }
 }
 
-function validationMinValue(input, span){
-    
+function validationMinValue(input, span) {
     if (!(input.value >= 0 && input.value <= 100) || input.value === "") {
         span.innerHTML = 'A porcentagem de acerto deve ser um número entre 0 e 100';
         err = showError(input, span);
@@ -304,8 +366,7 @@ function validationMinValue(input, span){
     }
 }
 
-function validationDescription(input, span){
-    
+function validationDescription(input, span) {
     if (input.value.split('').length < 30) {
         span.innerHTML = 'Mínimo de 30 caracteres';
         err = showError(input, span);
@@ -314,16 +375,19 @@ function validationDescription(input, span){
     }
 }
 
-function validationLevelUser(element){
-    console.log("apertou o botão")
+function validationLevelUser(element) {
     err = false;
-    let inputs = document.querySelectorAll('.form input');
-    let errors = document.querySelectorAll('.form span');
     let percents = [];
+
+    // Verifica se o elemento clicado é um button
+    checkFormConfirmation(element);
+
+    let inputs = itemsForm[0];
+    let errors = itemsForm[1];
 
     let inputTitle = inputs[0];
     let spanTitle = errors[1];
-    
+
     //verifica tamanho do título do nível
     validationLevelTitle(inputTitle, spanTitle);
 
@@ -333,48 +397,61 @@ function validationLevelUser(element){
     //verifica percentual de acerto
     validationMinValue(inputPercent, spanPercent);
 
-    if(!(spanPercent.classList.contains('span-error'))){
-        
-        levelUserQuiz.push(inputPercent.value);
-    }
-
     let inputUrl = inputs[2];
     let spanUrl = errors[3];
 
     //verifica URL
-    validationUrl(inputUrl, spanUrl); 
+    validationUrl(inputUrl, spanUrl);
 
     let inputDescription = document.querySelector("#description");
     let spanDescription = errors[4];
+
     validationDescription(inputDescription, spanDescription);
 
-    console.log("tem erro? "+err)
-    if (!err){
-        level = {
-            title: inputTitle.value,
-            image: inputUrl.value,
-            text: inputDescription.value,
-            minValue: inputPercent.value
-        };
+    if (!err) {
+        if (element.localName == 'button') {
+            if (createQuiz.levels.length < 1) {
+                alert('Você precisa de no mínimo 2 níveis cadastrados para concluir o quiz.')
 
-        let valid = levelUserQuiz.filter(percent => percent==0 ).length > 0? true : false;
+            } else {
+                // Verifica se tem algum percentual 0 
+                if ((createQuiz.levels.filter(level => level.minValue == 0).length > 0) || inputPercent.value == 0) {
+                    level = {
+                        title: inputTitle.value,
+                        image: inputUrl.value,
+                        text: inputDescription.value,
+                        minValue: inputPercent.value
+                    };
 
-        if (levelUserQuiz.length === amountLevel && valid) {
-            console.log ("entrei valid")
-                    
+                    createQuiz["levels"].push(level);
+                    renderCreateQuiz4();
+
+                } else {
+                    alert('Deve ter pelo menos um percentual com valor 0');
+                }
+            }
+
+        } else {
+            level = {
+                title: inputTitle.value,
+                image: inputUrl.value,
+                text: inputDescription.value,
+                minValue: inputPercent.value
+            };
+
+            createQuiz["levels"].push(level);
+            renderCreateQuiz3(element.id);
         }
-        createQuiz["levels"].push(level);
         console.log(createQuiz)
-        renderCreateQuiz3(element.id)
-        
     }
-
 }
 
 // Tela 4
 function renderCreateQuiz4() {
+    postQuizUser();
+
     main.innerHTML = `
-    <section class="register-quiz">
+        <section class="register-quiz">
         <p>Seu quizz está pronto!</p>
         <div class="quizz-image-sucess">
             <img src="https://revistacarro.com.br/wp-content/uploads/2021/06/Fiat-Pulse_1.jpg" />
@@ -384,7 +461,7 @@ function renderCreateQuiz4() {
         <button class="button-create-quiz">Acessar Quizz</button>
         <span class="link-back-home" onclick="getQuizzes();">Voltar pra home</span>
     </section>
-    `;
+        `;
 
     document.querySelector("header").scrollIntoView();
 }
@@ -392,7 +469,7 @@ function renderCreateQuiz4() {
 // Formularios
 function form(number) {
     return `
-    <div class="form">
+        <div class="form">
         <div>
             <span>Pergunta ${number}</span>
             <input type="text" placeholder="Texto da pergunta" />
@@ -434,18 +511,18 @@ function form(number) {
 
 function formClosed(flag, count) {
     return `
-        <div class="closed" onclick="${flag === 1 ? `validationQuiz2(this)` : `validationLevelUser(this)`}" id=${count}>
+        <div class="closed" onclick = "${flag === 1 ? `validationQuiz2(this)` : `validationLevelUser(this)`}" id = ${count}>
             <span>${flag === 1 ? `Pergunta ${count}` : `Nível ${count}`}</span>
             <img src="img/pencil.png" />
         </div>
-    `;
+        `;
 }
 
 function renderInputOrTextArea() {
     if (vw <= 375) {
-        return `<textarea id="description" placeholder="Descrição do nível"></textarea>`
+        return `<textarea id = "description" placeholder = "Descrição do nível"></textarea> `
     } else {
-        return `<input id="description" type="text" placeholder="Descrição do nível" />`
+        return `<input id = "description" type = "text" placeholder = "Descrição do nível" /> `
     }
 }
 
@@ -536,8 +613,35 @@ function hiddenError(input, span) {
     return false;
 }
 
-function getQuiz(element){
-    axios.get(`${URL_API}/quizzes/${element.id}`).then(quizPage)
+function getQuiz(element) {
+    axios.get(`${URL_API}/quizzes/${element.id} `).then(quizPage)
+}
+
+function postQuizUser() {
+    axios.post(URL_API + "/quizzes", createQuiz).then((props) => {
+        console.log(props.data.id, props.data.key);
+        const myQuiz = {
+            id: props.data.id,
+            key: props.data.key,
+            title: props.data.title,
+            image: props.data.image
+        }
+        submit(myQuiz)
+    });
+}
+
+function submit(obj) {
+    let abc = [];
+    let dataLS = JSON.parse(localStorage.getItem('myQuiz'));
+    if (dataLS !== null && dataLS != {}) {
+        dataLS.map(item => abc.push(item))
+    }
+
+    abc.push(obj);
+    localStorage.setItem('myQuiz', JSON.stringify(abc));
+
+    console.log(JSON.stringify(abc));
+    console.log('getItem: ', dataLS);
 }
 
 function quizPage(props) {
@@ -563,31 +667,31 @@ function quizPage(props) {
                 ${question(questions)}
             </div>
         </section>
-    `;
+        `;
 
-    document.querySelector(".title").scrollIntoView();
+    window.scrollTo(0, 0);
 }
 
-function comparador() { 
-	return Math.random() - 0.5; 
+function comparador() {
+    return Math.random() - 0.5;
 }
 
-function question (props) {
+function question(props) {
     let html = "";
 
-    props.map(prop =>{
+    props.map(prop => {
         const {
             answers,
             color,
             title
         } = prop;
-    
+
         answers.sort(comparador);
-    
+
         html += `
         <div class="question">
             <div class="title-question" style="background-color: ${color}">
-                    <p>${title}</p>
+                <p>${title}</p>
             </div>
             <div class="container-answers">
                 ${answer(answers)}
@@ -595,10 +699,10 @@ function question (props) {
         </div>
         `;
     });
-    return html;    
+    return html;
 }
 
-function answer(props){
+function answer(props) {
     let html = "";
     props.map(prop => {
         const {
@@ -606,46 +710,46 @@ function answer(props){
             isCorrectAnswer,
             text
         } = prop;
-        
+
         html += `
-        <div id ="${isCorrectAnswer}" class="answers" onclick="reply(this)">
+        <div id = "${isCorrectAnswer}" class="answers" onclick="reply(this)">
             <img src="${image}" alt="${text}">
-            <p>${text}</p>
+                <p>${text}</p>
         </div>
         `;
     });
     return html;
 }
 
-function reply(element){
+function reply(element) {
     const {
         id,
         parentNode,
     } = element;
 
-    for(let i = 0; i < parentNode.childElementCount; i++ ){
+    for (let i = 0; i < parentNode.childElementCount; i++) {
         let checked = parentNode.children[i];
-        
+
         checked.classList.add("block", `${checked.id}`);
 
-        if(checked !== element){
+        if (checked !== element) {
             checked.classList.add("opacity");
         }
     }
-    
-    if(id === "true"){
-        countCorrect++;        
+
+    if (id === "true") {
+        countCorrect++;
     }
-    
+
     qntQuestions--;
 
     setTimeout(scrollNext, 2000, element);
 }
 
-function scrollNext(element){
+function scrollNext(element) {
     let nextQuestion = element.parentNode.parentNode.nextElementSibling;
 
-    if(qntQuestions === 0){
+    if (qntQuestions === 0) {
         levelQuiz();
         document.querySelector(".level-quiz").scrollIntoView();
         currentQuizId = currentId;
@@ -655,14 +759,14 @@ function scrollNext(element){
     }
 }
 
-function levelQuiz(){
-    let successPercent = ((countCorrect/numberQuestions)*100);
+function levelQuiz() {
+    let successPercent = ((countCorrect / numberQuestions) * 100);
     let levelCorrect;
-    
-    for(let i = 0; i < levelsQuiz.length; i++){
+
+    for (let i = 0; i < levelsQuiz.length; i++) {
         let level = levelsQuiz[i];
-        if(level.minValue <= successPercent){
-            levelCorrect = level;            
+        if (level.minValue <= successPercent) {
+            levelCorrect = level;
         }
     }
 
@@ -673,9 +777,9 @@ function levelQuiz(){
     } = levelCorrect;
 
     const section = document.querySelector(".open-quiz");
-    
-    section.innerHTML +=`
-    <div class="level-quiz">
+
+    section.innerHTML += `
+        <div class="level-quiz">
         <div class="title-level-quiz">
             <p>${successPercent.toFixed(0)}% de acerto: ${title}</p>
         </div>
@@ -684,14 +788,14 @@ function levelQuiz(){
             <p>${text}</p>
         </div>
     </div>
-    <div class="finish-quiz">
-        <button onclick="restartQuiz()">Reiniciar Quizz</button>
-        <button onclick="getQuizzes()">Voltar pra home</button>
-    </div>
+        <div class="finish-quiz">
+            <button onclick="restartQuiz()">Reiniciar Quizz</button>
+            <button onclick="getQuizzes()">Voltar pra home</button>
+        </div>
     `;
 }
 
-function restartQuiz(){
+function restartQuiz() {
     let quiz = {
         id: currentQuizId
     };
