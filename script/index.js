@@ -29,7 +29,7 @@ function renderHome(props) {
 
     main.innerHTML = `
         <section class="quiz-list">
-            ${renderMyQuizzes(allQuizzes)}          
+            ${renderQuizzes(allQuizzes)}          
             <br />
             <h1>Todos os Quizzes</h1>
             <div class="all-quizzes">
@@ -39,10 +39,10 @@ function renderHome(props) {
         `;
 }
 
-function renderMyQuizzes(allQuizzes) {
+function renderQuizzes(allQuizzes) {
     let listMyQuizzes = localStorage.getItem('myQuiz');
     let list = JSON.parse(listMyQuizzes);
-    let quiz = [];
+    let myQuiz = [];
 
     if (list != null) {
         for (let i = 0; i < list.length; i++) {
@@ -69,7 +69,7 @@ function renderMyQuizzes(allQuizzes) {
             </div>
 
             <div class="all-quizzes">
-                ${renderQuiz(quiz)}
+                ${renderQuiz(myQuiz)}
              </div>
         `
     }
